@@ -91,18 +91,13 @@ public class BTreeNode {
 //		System.out.println("num = " + num);
 		this.keys = new int[MAX_SIZE + 1];
 		
-//		System.arraycopy(keys, 0, this.keys, 0, this.numKeys);
-		
-		
 		for(int i = 0; i < numKeys; ++i){
 			this.keys[i] = keys[i];
 		}
 		
 		if(this.isLeaf){
 			this.values = new IdxBlock[MAX_SIZE + 2];		
-			
-//			System.arraycopy(values, 0, this.values, 0, this.numKeys + 2);
-			
+				
 			for(int i = 0; i < num + 2; ++i){
 				if(i < values.length)
 					this.values[i] = values[i];
@@ -113,8 +108,6 @@ public class BTreeNode {
 			
 			this.children = new BTreeNode[MAX_SIZE + 2];
 			if(null != children){
-				
-//				System.arraycopy(children, 0, this.children, 0, children.length);
 				
 				for(int i = 0; i < num + 2; ++i){
 					if(i < children.length)
@@ -343,75 +336,77 @@ public class BTreeNode {
 	public BTreeNode splitBranch(int key, BTreeNode node){
 		BTreeNode newNode = null;
 		
-		this.lockWrite();
-		
-		if(!this.isLeaf){
+		try{
+			this.lockWrite();
+			if(!this.isLeaf){
 
-			if(this.numKeys == MAX_SIZE){
+				if(this.numKeys == MAX_SIZE){
 
-				int i = 0;
-				for(; i < MAX_SIZE;){
-					if(key >= this.keys[i])
-						++i;
-					else
-						break;
+					int i = 0;
+					for(; i < MAX_SIZE;){
+						if(key >= this.keys[i])
+							++i;
+						else
+							break;
+					}
+
+					if(this.keys[i] != key){						
+						for(int t = MAX_SIZE; t > i; --t){
+							this.keys[t] = this.keys[t-1];
+							this.children[t + 1] = this.children[t];
+						}
+						
+						this.keys[i] = key;
+						this.children[i + 1] = node;
+
+						int[] newKeys = new int[MAX_SIZE + 1];
+						BTreeNode[] newChildren = new BTreeNode[MAX_SIZE + 2];
+						
+						{
+							int from = (MAX_SIZE + 1)/2 + 1;
+							int to   = MAX_SIZE + 1;
+							int newLength = to - from; 
+							
+							for(int t = 0; t < newLength; ++t){
+					            if( t + from < to ) {
+					            	newKeys[t] = this.keys[from+t];
+					            } 
+					            else{
+					            	newKeys[t] = -1;
+					            }
+							}
+						}
+						
+						{
+							int from = (MAX_SIZE + 2 + 1)/2;
+							int to   = MAX_SIZE + 2;
+							int newLength = to - from; 
+							
+							for(int t = 0; t < newLength; ++t){
+					            if( t + from < to ) {
+					            	newChildren[t] = this.children[from+t];
+					            }else{
+					            	newChildren[t] = null;
+					            }
+							}
+						}
+						
+						int newNum = (MAX_SIZE + 1)/2;
+						newNode = new BTreeNode(this.dbName, false, newNum, newKeys, null, newChildren, this.parent, this.next, this);
+				        for( int t = 0; t <= newNum ; ++t ) {
+				        	if(null != newNode.children[t])
+				        		newNode.children[t].parent = newNode;
+				        }
+				        
+				        this.numKeys = (MAX_SIZE + 1)/2;
+						this.next = newNode;
+					}				
 				}
-
-				if(this.keys[i] != key){						
-					for(int t = MAX_SIZE; t > i; --t){
-						this.keys[t] = this.keys[t-1];
-						this.children[t + 1] = this.children[t];
-					}
-					
-					this.keys[i] = key;
-					this.children[i + 1] = node;
-
-					int[] newKeys = new int[MAX_SIZE + 1];
-					BTreeNode[] newChildren = new BTreeNode[MAX_SIZE + 2];
-					
-					{
-						int from = (MAX_SIZE + 1)/2 + 1;
-						int to   = MAX_SIZE + 1;
-						int newLength = to - from; 
-						
-						for(int t = 0; t < newLength; ++t){
-				            if( t + from < to ) {
-				            	newKeys[t] = this.keys[from+t];
-				            } 
-				            else{
-				            	newKeys[t] = -1;
-				            }
-						}
-					}
-					
-					{
-						int from = (MAX_SIZE + 2 + 1)/2;
-						int to   = MAX_SIZE + 2;
-						int newLength = to - from; 
-						
-						for(int t = 0; t < newLength; ++t){
-				            if( t + from < to ) {
-				            	newChildren[t] = this.children[from+t];
-				            }else{
-				            	newChildren[t] = null;
-				            }
-						}
-					}
-					
-					int newNum = (MAX_SIZE + 1)/2;
-					newNode = new BTreeNode(this.dbName, false, newNum, newKeys, null, newChildren, this.parent, this.next, this);
-			        for( int t = 0; t <= newNum ; ++t ) {
-			        	if(null != newNode.children[t])
-			        		newNode.children[t].parent = newNode;
-			        }
-			        
-			        this.numKeys = (MAX_SIZE + 1)/2;
-					this.next = newNode;
-				}				
 			}
+		}catch(Exception e){}
+		finally{
+			this.unLockWrite();
 		}
-		
-		this.unLockWrite();
 		
 		return newNode;
 	}
@@ -420,71 +415,76 @@ public class BTreeNode {
 	public SplitLeafVar splitLeaf(int key, IdxBlock value, TransMgr transMgr, Trans tid, CellLogMgr logMgr){
 
 		SplitLeafVar slVar = new SplitLeafVar();
-
-		this.lockWrite();
 		
-		if(this.isLeaf){
-			int from = MAX_SIZE/2;
-			int to   = MAX_SIZE;
-			int newLength = to - from;
-			
-			int[] newKeys = new int[MAX_SIZE + 1];
-			IdxBlock[] newValues = new IdxBlock[MAX_SIZE + 2];
-			
-			for(int i = 0; i < newLength; ++i){
-	            if( i + from < to ) {
-	            	newKeys[i] = this.keys[from+i];
-	            	newValues[i] = this.values[from+i];
-	            } 
-			}
+		try{
+			this.lockWrite();			
+			if(this.isLeaf){
+				int from = MAX_SIZE/2;
+				int to   = MAX_SIZE;
+				int newLength = to - from;
+				
+				int[] newKeys = new int[MAX_SIZE + 1];
+				IdxBlock[] newValues = new IdxBlock[MAX_SIZE + 2];
+				
+				for(int i = 0; i < newLength; ++i){
+		            if( i + from < to ) {
+		            	newKeys[i]   = this.keys[from+i];
+		            	newValues[i] = this.values[from+i];
+		            } 
+				}
 
-			slVar.newRight = new BTreeNode(this.dbName, true, MAX_SIZE/2, newKeys, newValues, null, this.parent, this.next, this);
-			this.next = slVar.newRight;
-			this.numKeys = MAX_SIZE/2;
-			
-			if(key >= slVar.newRight.lowerBound()){
-				slVar.oldVar = slVar.newRight.addValue(key, value, transMgr, tid, logMgr);
-			}else{
-				slVar.oldVar = this.addValue(key, value, transMgr, tid, logMgr);
+				slVar.newRight = new BTreeNode(this.dbName, true, MAX_SIZE/2, newKeys, newValues, null, this.parent, this.next, this);
+				this.next = slVar.newRight;
+				this.numKeys = MAX_SIZE/2;
+				
+				if(key >= slVar.newRight.lowerBound()){
+					slVar.oldVar = slVar.newRight.addValue(key, value, transMgr, tid, logMgr);
+				}else{
+					slVar.oldVar = this.addValue(key, value, transMgr, tid, logMgr);
+				}
 			}
+		}catch(Exception e){}
+		finally{
+			this.unLockWrite();
 		}
-		
-		this.unLockWrite();
-		
+
 		return slVar;
 	}
 	
 	public boolean addChild(int key, BTreeNode node){
 		boolean b = false;
-    	
-		this.lockWrite();
-		
-		if(!this.isLeaf && this.numKeys < MAX_SIZE){
-			int i = 0;
-			for(; i < this.numKeys; ){
-				if(this.keys[i] < key)
-					++i;
-				else
-					break;
-			}
-			
-			if(i < MAX_SIZE){
-				
-				for(int t = this.numKeys; t > i; --t){
-					this.keys[t] = this.keys[t - 1];
-					this.children[t+1] = this.children[t];
+
+		try{
+			    	
+			this.lockWrite();
+			if(!this.isLeaf && this.numKeys < MAX_SIZE){
+				int i = 0;
+				for(; i < this.numKeys; ){
+					if(this.keys[i] < key)
+						++i;
+					else
+						break;
 				}
 				
-				this.keys[i] = key;
-				this.children[i+1] = node;
-				this.numKeys++;
-				
-				b = true;
+				if(i < MAX_SIZE){
+					
+					for(int t = this.numKeys; t > i; --t){
+						this.keys[t] = this.keys[t - 1];
+						this.children[t+1] = this.children[t];
+					}
+					
+					this.keys[i] = key;
+					this.children[i+1] = node;
+					this.numKeys++;
+					
+					b = true;
+				}
 			}
+		}catch(Exception e){}
+		finally{
+			this.unLockWrite();
 		}
-		
-		this.unLockWrite();
-		
+
 		return b;
 	}
 	
@@ -846,8 +846,10 @@ public class BTreeNode {
 						break;
 				}
 				
+//				System.out.println("getValue.1 i = " + i + ", " + this.keys[i]);
 				if(this.keys[i] == key && IdxBlock.VALID == this.values[i].tag)
 				{
+//					System.out.println("getValue.2 i = " + i + ", " + this.keys[i]);
 					if(null != transMgr && null != tid && tid.getTransID() > 0){
 						if((false == this.values[i].drity)
 						 ||(this.values[i].tid == tid.getTransID())){
@@ -861,7 +863,9 @@ public class BTreeNode {
 						}
 					}else{
 						if(false == this.values[i].drity){
+//							System.out.println("getValue.3 i = " + i + ", " + this.keys[i]);
 							value = this.values[i].copyData();
+//							System.out.println("getValue.4 " + value.idxPageID + ", " + value.idxOffset + ", " + value.pageID + ", " + value.offset);
 						}else{
 							if(null != this.values[i].old){
 								value = this.values[i].old.copyData();

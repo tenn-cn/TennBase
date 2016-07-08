@@ -23,8 +23,8 @@ public class IndexPage {
 									//(key + pageid + blockid + tag)*BALANCE_SIZE 48
 										
 	
-	protected long pos = 0;
-	protected BTreeNode node = null;
+	protected long pos          = 0;
+	protected BTreeNode node    = null;
 	protected ByteBuffer buffer = null;
 	
 	public IndexPage(BTreeNode node, ByteBuffer buffer) {

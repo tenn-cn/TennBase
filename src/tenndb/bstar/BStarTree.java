@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
-import tenndb.RefVar;
 import tenndb.index.IBTree;
 import tenndb.index.IndexMgr;
 import tenndb.index.IndexPage;
@@ -286,43 +285,30 @@ public class BStarTree implements IBTree {
 	}
 
 	@Override
-	public IdxBlock insert(int key, IdxBlock value, Trans tid, CellLogMgr logMgr, RefVar t) throws AbortTransException  {
+	public IdxBlock insert(int key, IdxBlock value, Trans tid, CellLogMgr logMgr) throws AbortTransException  {
 		IdxBlock oldVal = null;		
 		try{			
-			long t9 = System.currentTimeMillis();
 			this.lockRead();
-			long t10 = System.currentTimeMillis();
-			t.var5 += (t10 - t9);
-			
+		
 			if(null!= root){
-				long t13 = System.currentTimeMillis();
 				BTreeNode currentNode = root;
 				while(null != currentNode && !currentNode.isLeaf){
 					currentNode = currentNode.getChild(key);
 				}
-				long t14 = System.currentTimeMillis();
-				t.var7 += (t14 -t13);
 
 				if(null != currentNode){
 					BTreeNode leaf = currentNode;
-					long t5 = System.currentTimeMillis();
+					
 					InsertVar insert = leaf.addValue(key, value, this.transMgr, tid, logMgr);
-					long t6 = System.currentTimeMillis();
-					t.var3 += (t6 - t5);
 					
 					if(false == insert.conflict){
 						if(!insert.inserted){
-							
-							long t7 = System.currentTimeMillis();
-							this.unLockRead();
+
+							this.unLockRead(); // read lock up to write lock
 							this.lockWrite();
-							long t8 = System.currentTimeMillis();
-							t.var4 += (t8 - t7);
 							
-							long t1 = System.currentTimeMillis();
 							SplitLeafVar slVar = leaf.splitLeaf(key, value, this.transMgr, tid, logMgr);
-							long t2 = System.currentTimeMillis();
-							t.var1 += (t2 - t1);
+
 							BTreeNode newRight = slVar.newRight;
 						
 							this.indexMgr.appendNewIndexPage(newRight, null);
@@ -334,14 +320,10 @@ public class BStarTree implements IBTree {
 							
 							while(null != parent && ! this.addChild(parent,addToParent, newRight)){
 
-								long t3 = System.currentTimeMillis();
 								BTreeNode parentRight = parent.splitBranch(addToParent, newRight); 	
-								long t4 = System.currentTimeMillis();
-								t.var2 += (t4 - t3);
-								this.indexMgr.appendNewIndexPage(parentRight, parent);
 
-								
-								
+								this.indexMgr.appendNewIndexPage(parentRight, parent);
+													
 			                    addToParent = parent.getMiddle();
 								parent      = parent.parent;
 								newRight    = parentRight;
@@ -356,9 +338,10 @@ public class BStarTree implements IBTree {
 								newRight.parent = newRoot;
 								root            = newRoot;					
 							}	
-							
+
+							this.lockRead(); // write lock down to read lock
 							this.unLockWrite();
-							this.lockRead();
+							
 						}else{
 							oldVal = insert.oldValue;
 							this.indexMgr.appendNewIndexPage(null, leaf);
@@ -374,15 +357,10 @@ public class BStarTree implements IBTree {
 				this.root = new BTreeNode(this.dbName, key, value, this.transMgr, tid);
 				this.indexMgr.appendNewIndexPage(root, null);
 				
-				this.unLockWrite();
 				this.lockRead();
+				this.unLockWrite();
 			}
-			
-	//		long t11 = System.currentTimeMillis();
-	//		this.indexMgr.flushNewPages();
-	//		long t12 = System.currentTimeMillis();
-	//		t.var6 += (t12 - t11);
-			
+						
 		}catch(AbortTransException ae){
 			System.out.println(ae);
 			throw ae;

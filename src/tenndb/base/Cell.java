@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import tenndb.IBase;
-import tenndb.RefVar;
 import tenndb.bstar.IdxBlock;
 import tenndb.common.FileMgr;
 import tenndb.data.DBBlock;
@@ -86,11 +85,11 @@ public class Cell implements IBase{
 		this.index.printNext();
 	}
 	
-	public boolean insert(int key, String var, RefVar t){
+	public boolean insert(int key, String var){
 		boolean b = false;
 		
 		try {
-			b = this.insert(key, var, null, t);
+			b = this.insert(key, var, null);
 		} catch (AbortTransException e) {
 			System.out.println(e);
 		}
@@ -166,7 +165,7 @@ public class Cell implements IBase{
 		return b;
 	}
 	
-	public boolean insert(int key, String var, Trans tid, RefVar t) throws AbortTransException{
+	public boolean insert(int key, String var, Trans tid) throws AbortTransException{
 		boolean b = false;
 		if(null != var && var.length() > 0){
 
@@ -175,13 +174,13 @@ public class Cell implements IBase{
 			DBBlock bblk = this.pageMgr.nextDBBlock(buff);
 		//	DBBlock bblk = new DBBlock(null);
 			if(null != bblk){
-		    	bblk.setVar(buff);
+		//		bblk.setVar(buff);
 		//		System.out.println(key + ", " + var + ", " + bblk.getPageID() + ", " + bblk.getOffset());
 				newblk.setPageID(bblk.getPageID());
 				newblk.setOffset(bblk.getOffset());
 				newblk.setTag(IdxBlock.VALID);
 				
-				this.index.insert(key, newblk, tid, this.logMgr, t);
+				this.index.insert(key, newblk, tid, this.logMgr);
 				
 				b = true;
 			}	
@@ -240,8 +239,9 @@ public class Cell implements IBase{
 //			System.out.println("search: " + iblk.getTime() + ", " + iblk.getPageID() + ", " + iblk.getOffset() );
 			bblk = this.pageMgr.getDBBlock(iblk.getPageID(), iblk.getOffset());
 			if(null != bblk){
-
 				str = bblk.getVar();
+			}else{
+	//			System.out.println("search: " + iblk.getTime() + ", " + iblk.getPageID() + ", " + iblk.getOffset() );
 			}
 		}
 		return str;

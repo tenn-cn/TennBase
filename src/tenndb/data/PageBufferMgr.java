@@ -231,7 +231,7 @@ public class PageBufferMgr {
 				if (null != fd && null != fd.getFileChannel() && fd.getFileChannel().isOpen()) {
 					int limit = (int) (fd.getFileChannel().size()/DBPage.PAGE_SIZE);
 					
-					if (pageID < limit) {
+					if (pageID <= limit) {
 						PageBuffer pageBuffer = new PageBuffer(this.dbName);
 						pageBuffer.pageID = pageID;
 						pageBuffer.buffer = this.bufMgr.pinBuffer();
@@ -261,7 +261,11 @@ public class PageBufferMgr {
 			fd = this.fileMgr.pinFileChannel(PREFIX_DATA + this.dbName);
 	
 			if(null != fd){
+				long size0 = fd.getFileChannel().size();
 				int pos = (int)(fd.getFileChannel().size()/DBPage.PAGE_SIZE) ;	
+				
+				System.out.println(size0 + ", " + size0/DBPage.PAGE_SIZE + ", " + size0 % DBPage.PAGE_SIZE );
+				
 //				System.out.println(key + ", append.1, size = " + fd.getFileChannel().size() + ", pos = " + pos);
 				ByteBuffer[] array = new ByteBuffer[DBPage.NEW_PAGES_SIZE];
 				List<PageBuffer> newBuffList = new ArrayList<PageBuffer>();

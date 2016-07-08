@@ -3,7 +3,6 @@ package tenndb.index;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-import tenndb.RefVar;
 import tenndb.bstar.BTreeNode;
 import tenndb.bstar.IdxBlock;
 import tenndb.log.CellLogMgr;
@@ -23,7 +22,7 @@ public interface IBTree {
 	
 	public void printTreePrior();
 	
-	public IdxBlock insert(int key, IdxBlock var, Trans tid, CellLogMgr logMgr, RefVar t) throws AbortTransException ;
+	public IdxBlock insert(int key, IdxBlock var, Trans tid, CellLogMgr logMgr) throws AbortTransException ;
 	
 	public IdxBlock update(int key, IdxBlock var, Trans tid, CellLogMgr logMgr) throws AbortTransException ;
 	

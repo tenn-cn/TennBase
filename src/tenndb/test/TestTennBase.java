@@ -31,21 +31,32 @@ public class TestTennBase {
 			long t1 = System.currentTimeMillis();
 				
 	//		cellStu.print();
-			for(int i = 1; i <= 300000; ++i){
+/*			for(int i = 1; i <= 300000; ++i){
 				
 				String str = i + "_helloworld_";
 		//		cellStu.insert(i, str, r);
+			}*/
+			
+			{
+				
+				int num = 0;
+				for(int i = 1; i <= 100000; ++i){
+					String str = cellStu.search(i, null);
+					if(null != str)
+					{
+					//	System.out.println("search" + i + " : " + str);
+					}
+					else{
+						++num;
+						System.out.println("+++++++++++++++++++++++++++++++++ miss " + i);
+					}
+				}
+				System.out.println(" miss " + num);
 			}
 			
 			{
-				for(int i = 1; i <= 100000; i+=100){
-					String str = cellStu.search(i, null);
-					if(null != str)
-						System.out.println("search" + i + " : " + str);
-					else
-						System.out.println("+++++++++++++++++++++++++++++++++ miss " + i);
-				}
-
+				String str = cellStu.search(99477, null);
+				System.out.println("search " + str);
 			}
 			
 /*			Trans trans = catalog.beginTrans();

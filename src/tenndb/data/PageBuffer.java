@@ -57,6 +57,7 @@ public class PageBuffer {
 		DBBlock blk = null;
 		if((this.offset + DBPage.BLOCK_SIZE + buff.length) <= this.size){
 			blk = this.getBlock(this.offset);
+			blk.setVar(buff);
 			this.offset += DBPage.BLOCK_SIZE + buff.length;
 		}
 		return blk;
@@ -89,7 +90,7 @@ public class PageBuffer {
 	
 	public DBBlock getBlock(int offset){
 		DBBlock blk = null;
-		
+//		System.out.println("getBlock " + offset + ", " + this.size + ", " + this.pageID);
 		if(offset < this.size){			
 			blk = new DBBlock(this);
 			blk.setOffset(offset);

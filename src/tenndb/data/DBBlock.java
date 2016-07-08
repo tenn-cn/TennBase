@@ -59,7 +59,7 @@ public class DBBlock {
 	//		this.key = this.page.buffer.getInt();
 			int len = this.page.buffer.getInt();
 //			System.out.println("len = " + len);
-	
+//			len = 10;
 			if(len > 0){
 				array = new byte[len];
 				this.page.buffer.get(array, 0, array.length);

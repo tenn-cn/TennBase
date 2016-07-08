@@ -36,12 +36,15 @@ public class DBPageMgr {
 		return buffer;
 	}
 	
-	public DBBlock getDBBlock(int pageID, int offset){
+	public synchronized DBBlock getDBBlock(int pageID, int offset){
 		DBBlock blk = null;
-		
+//		System.out.println("getDBBlock.1");
 		PageBuffer buffer = this.getPageBuffer(pageID);
 		if(null != buffer){
+//			System.out.println("getDBBlock.2");
 			blk = buffer.getBlock(offset);
+		}else{
+//			System.out.println("getDBBlock.3");
 		}
 
 		return blk;

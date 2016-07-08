@@ -8,7 +8,7 @@ import tenndb.tx.Trans;
 public interface IBase {
 	
 	
-	public boolean insert(int key, String var, RefVar t);
+	public boolean insert(int key, String var);
 	
 	public boolean update(int key, String var);
 	
@@ -17,7 +17,7 @@ public interface IBase {
 	public String  search(int key);
 	
 	
-	public boolean insert(int key, String var, Trans tid, RefVar t) throws AbortTransException;
+	public boolean insert(int key, String var, Trans tid) throws AbortTransException;
 	
 	public boolean update(int key, String var, Trans tid) throws AbortTransException;
 	
