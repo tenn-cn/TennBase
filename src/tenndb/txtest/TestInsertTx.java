@@ -19,19 +19,106 @@ public class TestInsertTx {
 		catalog.addCell(dbStudent, dbStudentID);
 		Cell cellStu = catalog.getCell(dbStudent);
 		
-/*		Trans trans = catalog.beginTrans();
-		for(int i = 1; i < 100; ++i){
-			String str = i + "_helloworld_";			
+		Trans trans1 = catalog.beginTrans();
+		Trans trans2 = catalog.beginTrans();
+/*		
+		for(int i = 1; i < 100; i+=2){
+			String str1 = i + "_helloworld1_";
+			String str2 = i+1 + "_helloworld2_";
 			try {
-				cellStu.insert(i, str, trans);
+				cellStu.insert(i, str1, trans1);
+			} catch (AbortTransException e) {
+				System.out.println(e);
+				e.printStackTrace();
+			}
+			
+			try {
+				cellStu.insert(i+1, str2, trans2);
 			} catch (AbortTransException e) {
 				System.out.println(e);
 				e.printStackTrace();
 			}
 		}
 		
-	//	catalog.rollback(trans);
-		catalog.commit(trans);*/
+		{
+			String str = 99 + "_helloworld2_";
+			try {
+				cellStu.insert(99, str, trans2);
+			} catch (AbortTransException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		{
+			String str = 98 + "_helloworld2_";
+			try {
+				cellStu.insert(98, str, trans1);
+			} catch (AbortTransException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}*/
+		
+		
+		
+		{
+			int key = 1;
+			String str = key + "_helloworld_1";
+			try {
+				cellStu.insert(key, str, trans1);
+			} catch (AbortTransException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				catalog.rollback(trans1);
+			}
+		}
+		
+		
+		{
+			int key = 2;
+			String str = key + "_helloworld_2";
+			try {
+				cellStu.insert(key, str, trans2);
+			} catch (AbortTransException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				catalog.rollback(trans2);
+			}
+		}
+		
+		
+		{
+			int key = 1;
+			String str = key + "_helloworld_2";
+			try {
+				cellStu.insert(key, str, trans2);
+			} catch (AbortTransException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				catalog.rollback(trans2);
+			}
+		}
+		
+		
+		{
+			int key = 2;
+			String str = key + "_helloworld_1";
+			try {
+				cellStu.insert(key, str, trans1);
+			} catch (AbortTransException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+				catalog.rollback(trans1);
+			}
+		}
+		
+		
+
+		
+//		catalog.rollback(trans);
+		catalog.commit(trans1);
+		catalog.commit(trans2);
 		
 		for(int i = 1; i <= 100000; ++i){
 			String str = cellStu.search(i, null);

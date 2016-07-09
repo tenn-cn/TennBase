@@ -660,6 +660,7 @@ public class BTreeNode {
 							}			
 						}else{
 							transMgr.setTransState(tid, Trans.ROLLBACK);
+							tid.setState(Trans.ROLLBACK);
 							////////// conflict
 							throw new AbortTransException("delValue: key = " + key);
 						}
@@ -722,7 +723,8 @@ public class BTreeNode {
 								transMgr.setTransState(tid, Trans.ROLLBACK);
 							}
 						}else{
-							transMgr.setTransState(tid, Trans.ROLLBACK);				
+							transMgr.setTransState(tid, Trans.ROLLBACK);
+							tid.setState(Trans.ROLLBACK);			
 							////////// conflict
 							throw new AbortTransException("setValue: key = " + key);
 						}

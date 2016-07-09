@@ -347,6 +347,8 @@ public class BStarTree implements IBTree {
 							this.indexMgr.appendNewIndexPage(null, leaf);
 						}
 					}else{
+						transMgr.setTransState(tid, Trans.ROLLBACK);
+						tid.setState(Trans.ROLLBACK);
 						throw new AbortTransException("insert: key = " + key);
 					}				
 				}

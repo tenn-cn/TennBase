@@ -1,6 +1,6 @@
 package tenndb.test;
 
-import tenndb.RefVar;
+
 import tenndb.base.Catalog;
 import tenndb.base.Cell;
 import tenndb.base.TennBase;
@@ -27,7 +27,6 @@ public class TestTennBase {
 //			catalog.addCell(dbDepartment);
 			Cell cellStu = catalog.getCell(dbStudent);
 			
-			RefVar r = new RefVar();
 			long t1 = System.currentTimeMillis();
 				
 	//		cellStu.print();
@@ -83,10 +82,6 @@ public class TestTennBase {
 			}*/
 			
 			long t3 = System.currentTimeMillis();
-			
-			System.out.println("cost = " + (t2 - t1) + ", cost = " + (t3 - t1));
-			System.out.println(" var1 = " + r.var1 + ", var2 = " + r.var2 + ", var3 = " + r.var3 + ", var4 = " + r.var4 + ", var5 = " + r.var5);
-			System.out.println(" var6 = " + r.var6 + ", var7 = " + r.var7 );
 			
 //			Cell cellDep = catalog.getCell(dbDepartment);
 			

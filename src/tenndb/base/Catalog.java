@@ -111,28 +111,30 @@ public class Catalog {
 		
 		if(null != tid && tid.getTransID() > 0 && null != this.transMgr){
 			
-			try{
-				this.logMgr.logCommit(tid);
-				
-				this.lockRead();
-				ArrayList<BlkID> blks = this.transMgr.getTransBlks(tid);
-				if(null != blks && blks.size() > 0){
+			if(tid.getState() == Trans.ACTIVE){
+				try{					
+					this.logMgr.logCommit(tid);
 					
-					for(int i = blks.size() - 1; i >= 0; --i){
-						BlkID blk = blks.get(i);
-						Cell cell = this.tabNameToCells.get(blk.getDbName());
-						if(null != cell){
-							cell.commit(blk.getKey(), tid);
-						}
-					}						
+					this.lockRead();
+					ArrayList<BlkID> blks = this.transMgr.getTransBlks(tid);
+					if(null != blks && blks.size() > 0){
+						
+						for(int i = blks.size() - 1; i >= 0; --i){
+							BlkID blk = blks.get(i);
+							Cell cell = this.tabNameToCells.get(blk.getDbName());
+							if(null != cell){
+								cell.commit(blk.getKey(), tid);
+							}
+						}						
+					}
+					this.transMgr.delTransBlks(tid);
+					b = true;
+				}catch(Exception e){}
+				finally{
+					this.unLockRead();
 				}
-				this.transMgr.delTransBlks(tid);
-				b = true;
-			}catch(Exception e){}
-			finally{
-				this.unLockRead();
+				this.logMgr.logTerminated(tid);
 			}
-			this.logMgr.logTerminated(tid);
 		}
 		
 		return b;
