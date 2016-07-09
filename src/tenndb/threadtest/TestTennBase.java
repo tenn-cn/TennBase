@@ -14,9 +14,9 @@ public class TestTennBase {
 	 */
 	public static void main(String[] args) {
 
-		Catalog catalog = TennBase.getCatalog();
+		Catalog catalog  = TennBase.getCatalog();
 		String dbStudent = "student";
-		int dbStudentID = 1;
+		int dbStudentID  = 1;
 		catalog.addCell(dbStudent, dbStudentID);
 		Cell cellStu = catalog.getCell(dbStudent);
 		
