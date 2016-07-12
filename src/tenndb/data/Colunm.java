@@ -7,25 +7,32 @@ import tenndb.common.ByteUtil;
 
 public class Colunm {
 
-	protected int         key;
+	protected String      key;
+	
+	protected int         hashCode;
 	protected int         len;
 	protected int         version;
 	protected List<Filed> fileds;
-	
-	public Colunm(int key, int version, List<Filed> fileds) {
-		super();		
-		this.key     = key;
-		this.version = version;
-		this.fileds  = fileds;
-		this.len     = 0;
-	}
 
-	public Colunm(int key, int version) {
+	public Colunm(String key, int version) {
 		super();		
-		this.key     = key;
-		this.version = version;
-		this.fileds  = new ArrayList<Filed>();
-		this.len     = 0;
+		this.key      = key;
+		this.hashCode = hashCode(key);
+		this.version  = version;
+		this.fileds   = new ArrayList<Filed>();
+		this.len      = 0;
+		
+		this.addFiled(new Filed("key", key));
+	}
+	
+
+	
+	public static final int hashCode(String value){
+		int hashCode = 0;
+		if(null != value && value.length() > 0){
+			hashCode = value.hashCode();
+		}
+		return hashCode;
 	}
 	
 	public int getLen(){
@@ -36,7 +43,14 @@ public class Colunm {
 		return version;
 	}
 
-	public int getKey() {
+	public int getHashCode(){
+		return this.hashCode;
+	}
+	
+	public String getKey() {
+		if(null == this.key && this.fileds.size() > 0){
+			this.key = this.fileds.get(0).getValue();
+		}
 		return key;
 	}
 	

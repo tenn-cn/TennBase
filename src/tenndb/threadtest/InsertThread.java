@@ -20,9 +20,15 @@ public class InsertThread extends Thread {
 		{
 			for(int i = 1; i <= 100000; ++i){
 				
-				String str = i + "_helloworld_";
-				Colunm colunm = new Colunm(i, 1);
-				colunm.addFiled(new Filed("var1", str));
+				String key = i + "_helloworld_";
+				
+				Colunm colunm = new Colunm(key, 1);
+				colunm.addFiled(new Filed("var1", key + 1));
+				colunm.addFiled(new Filed("var2", key + 2));
+				colunm.addFiled(new Filed("var3", key + 3));
+				colunm.addFiled(new Filed("var4", key + 4));
+				colunm.addFiled(new Filed("var5", key + 5));
+				colunm.addFiled(new Filed("var6", key + 6));
 				this.cell.insert(i, colunm);
 			}
 		}

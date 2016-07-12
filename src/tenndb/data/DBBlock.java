@@ -1,6 +1,5 @@
 package tenndb.data;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import tenndb.common.ByteUtil;
@@ -42,10 +41,10 @@ public class DBBlock {
 	
 	public Colunm getColunm(){
 		Colunm colunm = null; 
-		List<Filed> fileds = new ArrayList<Filed>();
 		int version = 0;
 		int length  = 0;
 		int key     = 0;
+		
 		synchronized(this.page){
 			this.page.buffer.rewind();
 			this.page.buffer.position(DBPage.HEAD_SIZE + this.offset);
@@ -64,36 +63,43 @@ public class DBBlock {
 						
 			int total = length;
 			int index = 0;
+			
+
 			while(total > 0){
 				int len = this.page.buffer.getShort();
 				if(len < 0){
 					len += ByteUtil.SHORT_MAX_VALUE;
 				}
-				index++;
+
 				if(len > 0){
 					byte[] buff = new byte[len];
 					this.page.buffer.get(buff);
 					String value = new String(buff);
-					Filed filed = new Filed("filed_" + index, value);
-					fileds.add(filed);
+					
+					if(0 == index){
+						colunm = new Colunm(value, version); 
+					}else{
+						Filed filed = new Filed("filed_" + index, value);
+						colunm.fileds.add(filed);
+					}
 				}
 				
 				total -= (ByteUtil.SHORT_SIZE + len);
-			}
-			
+				index++;
+			}			
 		}
-		colunm = new Colunm(key, version, fileds); 
+
 		colunm.len = length;
 		return colunm;
 	}
 	
 	public void setColunm(Colunm colunm){
 		if(null != colunm ){
-			this.setVar(colunm.key, colunm.version, colunm.len, colunm.fileds);
+			this.setVar(colunm.hashCode, colunm.version, colunm.len, colunm.fileds);
 		}
 	}
 	
-	public void setVar(int key, int version, int len, List<Filed> fileds){
+	public void setVar(int hashCode, int version, int len, List<Filed> fileds){
 
 		if(null != fileds && version >= 0){
 			
@@ -107,7 +113,7 @@ public class DBBlock {
 				//word filed1_buff
 				//word filed2_len
 				//word filed2_buff
-				this.page.buffer.putInt(key);
+				this.page.buffer.putInt(hashCode);
 				
 				byte[] vers = ByteUtil.shortToByte2_big(version);				
 				this.page.buffer.put(vers);

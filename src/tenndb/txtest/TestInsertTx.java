@@ -68,8 +68,8 @@ public class TestInsertTx {
 			int key = 1;
 			String str = key + "_helloworld_1";
 			try {
-				Colunm colunm = new Colunm(key, 1);
-				colunm.addFiled(new Filed("var1", str));
+				Colunm colunm = new Colunm(str, 1);
+				colunm.addFiled(new Filed("var1", str + 1));
 				
 				cellStu.insert(key, colunm, trans1);
 			} catch (AbortTransException e) {
@@ -84,8 +84,8 @@ public class TestInsertTx {
 			int key = 2;
 			String str = key + "_helloworld_2";
 			try {
-				Colunm colunm = new Colunm(key, 1);
-				colunm.addFiled(new Filed("var1", str));
+				Colunm colunm = new Colunm(str, 1);
+				colunm.addFiled(new Filed("var1", str + 1));
 				
 				cellStu.insert(key, colunm, trans2);
 			} catch (AbortTransException e) {
@@ -100,8 +100,8 @@ public class TestInsertTx {
 			int key = 1;
 			String str = key + "_helloworld_2";
 			try {
-				Colunm colunm = new Colunm(key, 1);
-				colunm.addFiled(new Filed("var1", str));
+				Colunm colunm = new Colunm(str, 1);
+				colunm.addFiled(new Filed("var1", str + 1));
 				
 				cellStu.insert(key, colunm, trans2);
 			} catch (AbortTransException e) {
@@ -116,8 +116,8 @@ public class TestInsertTx {
 			int key = 2;
 			String str = key + "_helloworld_1";
 			try {
-				Colunm colunm = new Colunm(key, 1);
-				colunm.addFiled(new Filed("var1", str));
+				Colunm colunm = new Colunm(str, 1);
+				colunm.addFiled(new Filed("var1", str + 1));
 				
 				cellStu.insert(key, colunm, trans1);
 			} catch (AbortTransException e) {
