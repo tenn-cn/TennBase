@@ -32,24 +32,33 @@ public class TestTennBase {
 			long t1 = System.currentTimeMillis();
 				
 	//		cellStu.print();
-			for(int i = 1; i <= 300; ++i){
+			for(int i = 1; i <= 1; ++i){
 				
 				String str = i + "_helloworld_";
 				
 				Colunm colunm = new Colunm(i, 1);
-				colunm.addFiled(new Filed("var1", str));
+				colunm.addFiled(new Filed("var1", str + 1));
+				colunm.addFiled(new Filed("var2", str + 2));
+				colunm.addFiled(new Filed("var3", str + 3));
+				colunm.addFiled(new Filed("var4", str + 4));
+				colunm.addFiled(new Filed("var5", str + 5));
+				colunm.addFiled(new Filed("var6", str + 6));
 				
-	//			cellStu.insert(i, colunm);
+				cellStu.insert(i, colunm);
 			}
 			
 			{
 				
 				int num = 0;
-				for(int i = 1; i <= 100; ++i){
+				for(int i = 1; i <= 1; ++i){
 					Colunm colunm = cellStu.search(i);
 					if(null != colunm)
 					{
-						System.out.println("search" + i + " : " + colunm.getKey() + ", " + colunm.getLen());
+						System.out.println("search" + i + " : " + colunm.getKey() + ", " + colunm.getVersion() + ", " + colunm.getLen());
+						for(int t = 0; t < colunm.getFileds().size(); ++t){
+							Filed filed = colunm.getFileds().get(t);
+							System.out.println("       " + filed.getName() + ", " + filed.getValue());
+						}
 					}
 					else{
 						++num;

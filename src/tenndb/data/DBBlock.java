@@ -89,11 +89,11 @@ public class DBBlock {
 	
 	public void setColunm(Colunm colunm){
 		if(null != colunm ){
-			this.setVar(colunm.key, colunm.version, colunm.fileds);
+			this.setVar(colunm.key, colunm.version, colunm.len, colunm.fileds);
 		}
 	}
 	
-	public void setVar(int key, int version, List<Filed> fileds){
+	public void setVar(int key, int version, int len, List<Filed> fileds){
 
 		if(null != fileds && version >= 0){
 			
@@ -112,7 +112,8 @@ public class DBBlock {
 				byte[] vers = ByteUtil.shortToByte2_big(version);				
 				this.page.buffer.put(vers);
 
-				this.page.buffer.putShort((short)0);
+				byte[] lens = ByteUtil.shortToByte2_big(len);	
+				this.page.buffer.put(lens);
 				
 				int total = 0;
 				for(int i = 0; i < fileds.size(); ++i){
@@ -123,9 +124,9 @@ public class DBBlock {
 							total += (ByteUtil.SHORT_SIZE + buff.length);							
 							if(total <= ByteUtil.SHORT_MAX_VALUE){
 								
-								byte[] len = ByteUtil.shortToByte2_big(total);
+								byte[] itemsize = ByteUtil.shortToByte2_big(buff.length);
 								
-								this.page.buffer.put(len,  0, len.length);								
+								this.page.buffer.put(itemsize,  0, itemsize.length);								
 								this.page.buffer.put(buff, 0, buff.length);	
 							}else{
 								total -= (ByteUtil.SHORT_SIZE + buff.length);
@@ -134,10 +135,6 @@ public class DBBlock {
 						}						
 					}
 				}
-				
-				this.page.buffer.position(DBPage.HEAD_SIZE + this.offset + ByteUtil.INT_SIZE + ByteUtil.SHORT_SIZE);
-				byte[] len = ByteUtil.shortToByte2_big(total);
-				this.page.buffer.put(len);
 			}
 		}
 	}
