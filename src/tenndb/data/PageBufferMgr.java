@@ -48,36 +48,36 @@ public class PageBufferMgr {
 		this.bufMgr      = new ByteBufferMgr(DBPage.PAGE_SIZE);
 	}
 	
-	protected DBBlock getBlock(byte[] buff){
+	protected DBBlock getBlock(Colunm colunm){
 		DBBlock blk = null;
 		PageBuffer page = this.unusedQueue.peek();
 
 		if(null != page){
 
-			if(page.isfull(buff)){	
+			if(page.isfull(colunm)){	
 	
 				PageBuffer full = this.unusedQueue.poll();
 				this.usedList.add(full);
 				this.unusedMap.remove(page.pageID);
 				page = this.unusedQueue.peek();
 			}else{
-//				System.out.println("getBlock: " + page.pageID + ", " + page.size + ", " + page.offset);
+
 			}
 			
 			if(null != page){
-				blk = page.nextBlock(buff);
+				blk = page.nextBlock(colunm);
 			}
 		}
 		return blk;
 	}
 	
-	public synchronized DBBlock nextBlock(byte[] buff){
+	public synchronized DBBlock nextBlock(Colunm colunm){
 		DBBlock blk = null;
-		blk = this.getBlock(buff);
+		blk = this.getBlock(colunm);
 
 		if(null == blk){
 			this.apppend();
-			blk = this.getBlock(buff);
+			blk = this.getBlock(colunm);
 		}
 		
 		return blk;

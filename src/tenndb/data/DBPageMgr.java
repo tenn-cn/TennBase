@@ -50,8 +50,8 @@ public class DBPageMgr {
 		return blk;
 	}
 	
-	public DBBlock nextDBBlock(byte[] buff){
+	public DBBlock nextDBBlock(Colunm colunm){
 
-		return this.pageMgr.nextBlock(buff);
+		return this.pageMgr.nextBlock(colunm);
 	}
 }

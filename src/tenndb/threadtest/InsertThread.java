@@ -1,6 +1,8 @@
 package tenndb.threadtest;
 
 import tenndb.base.Cell;
+import tenndb.data.Colunm;
+import tenndb.data.Filed;
 
 public class InsertThread extends Thread {
 
@@ -19,7 +21,9 @@ public class InsertThread extends Thread {
 			for(int i = 1; i <= 100000; ++i){
 				
 				String str = i + "_helloworld_";
-				this.cell.insert(i, str);
+				Colunm colunm = new Colunm(i, 1);
+				colunm.addFiled(new Filed("var1", str));
+				this.cell.insert(i, colunm);
 			}
 		}
 	}

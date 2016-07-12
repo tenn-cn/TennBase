@@ -4,6 +4,8 @@ package tenndb.test;
 import tenndb.base.Catalog;
 import tenndb.base.Cell;
 import tenndb.base.TennBase;
+import tenndb.data.Colunm;
+import tenndb.data.Filed;
 import tenndb.tx.AbortTransException;
 import tenndb.tx.Trans;
 
@@ -30,20 +32,24 @@ public class TestTennBase {
 			long t1 = System.currentTimeMillis();
 				
 	//		cellStu.print();
-/*			for(int i = 1; i <= 300000; ++i){
+			for(int i = 1; i <= 300; ++i){
 				
 				String str = i + "_helloworld_";
-		//		cellStu.insert(i, str, r);
-			}*/
+				
+				Colunm colunm = new Colunm(i, 1);
+				colunm.addFiled(new Filed("var1", str));
+				
+	//			cellStu.insert(i, colunm);
+			}
 			
 			{
 				
 				int num = 0;
-				for(int i = 1; i <= 100000; ++i){
-					String str = cellStu.search(i, null);
-					if(null != str)
+				for(int i = 1; i <= 100; ++i){
+					Colunm colunm = cellStu.search(i);
+					if(null != colunm)
 					{
-					//	System.out.println("search" + i + " : " + str);
+						System.out.println("search" + i + " : " + colunm.getKey() + ", " + colunm.getLen());
 					}
 					else{
 						++num;
@@ -54,7 +60,7 @@ public class TestTennBase {
 			}
 			
 			{
-				String str = cellStu.search(99477, null);
+				Colunm str = cellStu.search(99477, null);
 				System.out.println("search " + str);
 			}
 			

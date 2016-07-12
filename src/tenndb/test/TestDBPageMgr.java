@@ -61,7 +61,7 @@ public class TestDBPageMgr {
 			IdxBlock idxblk = tree.search(key, null);
 			System.out.println(idxblk.getPageID() + ", " + idxblk.getOffset());
 			DBBlock dbblk = dbPageMgr.getDBBlock(idxblk.getPageID(), idxblk.getOffset());
-			System.out.println(key + ", " + new String(dbblk.getVar()));
+			System.out.println(key + ", " + dbblk.getColunm().getKey());
 		}
  		
 		indexMgr.flush();

@@ -4,6 +4,7 @@ import java.util.List;
 
 import tenndb.base.Cell;
 import tenndb.common.FileMgr;
+import tenndb.data.Colunm;
 import tenndb.tx.Trans;
 import tenndb.tx.TransMgr;
 
@@ -54,8 +55,8 @@ public class TestCell {
 	//	TransID tid = new TransID();	
 
  		for(int i = 1; i <= 100; i+=10){
-			String var = cell.search(i, tid);
-			System.out.println("key = " + i + ", var = " + var);
+			Colunm var = cell.search(i, tid);
+			System.out.println("key = " + i + ", var = " + var.getKey());
 		}
  		
  		
@@ -66,10 +67,10 @@ public class TestCell {
 
 		System.out.println("++++++++++++++++++++++++++++");
 		
-		List<String> list2 = cell.range(8888, 8988, false);
+		List<Colunm> list2 = cell.range(8888, 8988, false);
 		
 		for(int i = 0; i < list2.size(); ++i){
-			System.out.println("range2 " + list2.get(i));
+			System.out.println("range2 " + list2.get(i).getKey());
 		}
 		
 		cell.printTreeNext();

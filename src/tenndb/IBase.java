@@ -2,24 +2,25 @@ package tenndb;
 
 import java.util.List;
 
+import tenndb.data.Colunm;
 import tenndb.tx.AbortTransException;
 import tenndb.tx.Trans;
 
 public interface IBase {
 	
 	
-	public boolean insert(int key, String var);
+	public boolean insert(int key, Colunm colunm);
 	
-	public boolean update(int key, String var);
+	public boolean update(int key, Colunm colunm);
 	
 	public boolean delete(int key);
 	
-	public String  search(int key);
+	public Colunm  search(int key);
 	
 	
-	public boolean insert(int key, String var, Trans tid) throws AbortTransException;
+	public boolean insert(int key, Colunm colunm, Trans tid) throws AbortTransException;
 	
-	public boolean update(int key, String var, Trans tid) throws AbortTransException;
+	public boolean update(int key, Colunm colunm, Trans tid) throws AbortTransException;
 	
 	public boolean delete(int key, Trans tid) throws AbortTransException;
 	
@@ -27,11 +28,11 @@ public interface IBase {
 	
 	public boolean commit(int key, Trans tid);
 
-	public String  search(int key, Trans tid);
+	public Colunm  search(int key, Trans tid);
 	
 	public int count(int fromKey, int toKey);
 	
-	public List<String> range(int fromKey, int toKey, boolean isInc);
+	public List<Colunm> range(int fromKey, int toKey, boolean isInc);
 	
 	public void printTreeNext();
 	

@@ -8,6 +8,7 @@ import tenndb.bstar.IdxBlock;
 import tenndb.common.FileMgr;
 import tenndb.data.DBBlock;
 import tenndb.data.DBPageMgr;
+import tenndb.data.Colunm;
 import tenndb.index.IBTree;
 import tenndb.index.IndexMgr;
 import tenndb.log.CellLogMgr;
@@ -77,19 +78,22 @@ public class Cell implements IBase{
 		}
 	}
 	
+	@Override
 	public void printTreePrior(){
 		this.index.printTreePrior();
 	}
 	
+	@Override
 	public void printTreeNext(){
 		this.index.printNext();
 	}
 	
-	public boolean insert(int key, String var){
+	@Override
+	public boolean insert(int key, Colunm colunm){
 		boolean b = false;
 		
 		try {
-			b = this.insert(key, var, null);
+			b = this.insert(key, colunm, null);
 		} catch (AbortTransException e) {
 			System.out.println(e);
 		}
@@ -97,11 +101,12 @@ public class Cell implements IBase{
 		return b;
 	}
 	
-	public boolean update(int key, String var) {
+	@Override
+	public boolean update(int key, Colunm colunm) {
 		boolean b = false;
 		
 		try {
-			b = this.update(key, var, null);
+			b = this.update(key, colunm, null);
 		} catch (AbortTransException e) {
 			System.out.println(e);
 		}
@@ -109,6 +114,7 @@ public class Cell implements IBase{
 		return b;
 	}
 	
+	@Override
 	public boolean delete(int key){
 		boolean b = false;
 		try {
@@ -119,15 +125,18 @@ public class Cell implements IBase{
 		return b;
 	}
 	
-	public String search(int key){
+	@Override
+	public Colunm search(int key){
 		return this.search(key, null);
 	}	
 	
+	@Override
 	public boolean rollback(int key, Trans tid){
 		
 		return this.index.rollback(key, tid, logMgr);
 	}
 	
+	@Override
 	public boolean commit(int key, Trans tid){
 	
 		return this.index.commit(key, tid, logMgr);
@@ -165,17 +174,16 @@ public class Cell implements IBase{
 		return b;
 	}
 	
-	public boolean insert(int key, String var, Trans tid) throws AbortTransException{
+	@Override
+	public boolean insert(int key, Colunm colunm, Trans tid) throws AbortTransException{
 		boolean b = false;
-		if(null != var && var.length() > 0){
+		if(null != colunm){
 
-			IdxBlock newblk = new IdxBlock(key);
-			byte[] buff = var.getBytes();
-			DBBlock bblk = this.pageMgr.nextDBBlock(buff);
-		//	DBBlock bblk = new DBBlock(null);
+			DBBlock bblk = this.pageMgr.nextDBBlock(colunm);
+
 			if(null != bblk){
-		//		bblk.setVar(buff);
-		//		System.out.println(key + ", " + var + ", " + bblk.getPageID() + ", " + bblk.getOffset());
+				
+				IdxBlock newblk = new IdxBlock(key);
 				newblk.setPageID(bblk.getPageID());
 				newblk.setOffset(bblk.getOffset());
 				newblk.setTag(IdxBlock.VALID);
@@ -188,18 +196,18 @@ public class Cell implements IBase{
 		return b;
 	}
 	
-	public boolean update(int key, String var, Trans tid) throws AbortTransException{
+	@Override
+	public boolean update(int key, Colunm colunm, Trans tid) throws AbortTransException{
 		boolean b = false;		
 		IdxBlock oldblk = null;
 		
-		if(null != var && var.length() > 0){
-			IdxBlock newblk = new IdxBlock(key);
-			byte[] buff = var.getBytes();
-			DBBlock bblk = this.pageMgr.nextDBBlock(buff);
+		if(null != colunm){
+			
+			DBBlock bblk = this.pageMgr.nextDBBlock(colunm);
 
 			if(null != bblk){
-				bblk.setVar(var.getBytes());
 				
+				IdxBlock newblk = new IdxBlock(key);	
 				newblk.setPageID(bblk.getPageID());
 				newblk.setOffset(bblk.getOffset());
 			
@@ -214,6 +222,7 @@ public class Cell implements IBase{
 		return b;
 	}
 	
+	@Override
 	public boolean delete(int key, Trans tid) throws AbortTransException{
 		boolean b = false;
 		IdxBlock oldblk = null;
@@ -231,43 +240,44 @@ public class Cell implements IBase{
 		return this.index.search(key, null);
 	}
 	
-	public String search(int key, Trans tid){
-		String str = null;
-		DBBlock bblk = null;
+	@Override
+	public Colunm search(int key, Trans tid){
+		Colunm colunm = null;
+
 		IdxBlock iblk = this.index.search(key, tid);
 		if(null != iblk){
-//			System.out.println("search: " + iblk.getTime() + ", " + iblk.getPageID() + ", " + iblk.getOffset() );
-			bblk = this.pageMgr.getDBBlock(iblk.getPageID(), iblk.getOffset());
+
+			DBBlock bblk = this.pageMgr.getDBBlock(iblk.getPageID(), iblk.getOffset());
 			if(null != bblk){
-				str = bblk.getVar();
+				colunm = bblk.getColunm();
 			}else{
-	//			System.out.println("search: " + iblk.getTime() + ", " + iblk.getPageID() + ", " + iblk.getOffset() );
+
 			}
 		}
-		return str;
+		return colunm;
 	}
 	
+	@Override
 	public int count(int fromKey, int toKey){
 		
 		return this.index.count(fromKey, toKey);
 	}
 	
-	public List<String> range(int fromKey, int toKey, boolean isInc){
+	@Override
+	public List<Colunm> range(int fromKey, int toKey, boolean isInc){
 		
-		List<String> bbList = new ArrayList<String>();
+		List<Colunm> bbList = new ArrayList<Colunm>();
 		
 		List<IdxBlock> idxBList = this.index.range(fromKey, toKey, isInc);
 		
 		if(null != idxBList && idxBList.size() > 0){
-			
-			System.out.println("idxBList.size() " + idxBList.size());
 			
 			DBBlock temp = null;
 			for(int i = 0; i < idxBList.size(); ++i){
 				IdxBlock blk = idxBList.get(i);
 				temp = this.pageMgr.getDBBlock(blk.getPageID(), blk.getOffset());
 				if(null != temp){
-					bbList.add(temp.getVar());
+					bbList.add(temp.getColunm());
 				}
 			}
 		}

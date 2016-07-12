@@ -49,43 +49,35 @@ public class PageBuffer {
 		return size;
 	}
 	
-	public  boolean isfull(byte[] buff){
-		return (this.offset + DBPage.BLOCK_SIZE + buff.length) > this.size;
+	public  boolean isfull(Colunm colunm){
+		return (this.offset + DBBlock.HEAD_SIZE + colunm.len) > this.size;
 	}
 	
-	public  DBBlock nextBlock(byte[] buff){
+	public  DBBlock nextBlock(Colunm colunm){
 		DBBlock blk = null;
-		if((this.offset + DBPage.BLOCK_SIZE + buff.length) <= this.size){
+		if((this.offset + DBBlock.HEAD_SIZE + colunm.len) <= this.size){
 			blk = this.getBlock(this.offset);
-			blk.setVar(buff);
-			this.offset += DBPage.BLOCK_SIZE + buff.length;
+			blk.setColunm(colunm);
+			this.offset += DBBlock.HEAD_SIZE + colunm.len;
 		}
 		return blk;
 	}
 	
-	public void setString(int offset, String var){
+	public void setBlock(Colunm colunm, int offset){
 		DBBlock block = this.getBlock(offset);
 		
 		if(null != block){
-			block.setVar(var);
+			block.setColunm(colunm);
 		}
 	}
 	
-	public void setBlock(byte[] var, int offset){
-		DBBlock block = this.getBlock(offset);
-		
-		if(null != block){
-			block.setVar(var);
-		}
-	}
-	
-	public String getString(int offset){
-		String str = null;
+	public Colunm getColunm(int offset){
+		Colunm colunm = null;;
 		DBBlock blk = this.getBlock(offset);
 		if(null != blk){
-			str = blk.getVar();
+			colunm = blk.getColunm();
 		}
-		return str;
+		return colunm;
 	}
 	
 	public DBBlock getBlock(int offset){
@@ -95,7 +87,6 @@ public class PageBuffer {
 			blk = new DBBlock(this);
 			blk.setOffset(offset);
 			blk.setPageID(this.pageID);
-
 		}
 
 		return blk;

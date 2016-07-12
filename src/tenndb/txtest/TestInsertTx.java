@@ -3,6 +3,8 @@ package tenndb.txtest;
 import tenndb.base.Catalog;
 import tenndb.base.Cell;
 import tenndb.base.TennBase;
+import tenndb.data.Colunm;
+import tenndb.data.Filed;
 import tenndb.tx.AbortTransException;
 import tenndb.tx.Trans;
 
@@ -66,7 +68,10 @@ public class TestInsertTx {
 			int key = 1;
 			String str = key + "_helloworld_1";
 			try {
-				cellStu.insert(key, str, trans1);
+				Colunm colunm = new Colunm(key, 1);
+				colunm.addFiled(new Filed("var1", str));
+				
+				cellStu.insert(key, colunm, trans1);
 			} catch (AbortTransException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -79,7 +84,10 @@ public class TestInsertTx {
 			int key = 2;
 			String str = key + "_helloworld_2";
 			try {
-				cellStu.insert(key, str, trans2);
+				Colunm colunm = new Colunm(key, 1);
+				colunm.addFiled(new Filed("var1", str));
+				
+				cellStu.insert(key, colunm, trans2);
 			} catch (AbortTransException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -92,7 +100,10 @@ public class TestInsertTx {
 			int key = 1;
 			String str = key + "_helloworld_2";
 			try {
-				cellStu.insert(key, str, trans2);
+				Colunm colunm = new Colunm(key, 1);
+				colunm.addFiled(new Filed("var1", str));
+				
+				cellStu.insert(key, colunm, trans2);
 			} catch (AbortTransException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -105,7 +116,10 @@ public class TestInsertTx {
 			int key = 2;
 			String str = key + "_helloworld_1";
 			try {
-				cellStu.insert(key, str, trans1);
+				Colunm colunm = new Colunm(key, 1);
+				colunm.addFiled(new Filed("var1", str));
+				
+				cellStu.insert(key, colunm, trans1);
 			} catch (AbortTransException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -117,13 +131,13 @@ public class TestInsertTx {
 
 		
 //		catalog.rollback(trans);
-		catalog.commit(trans1);
-		catalog.commit(trans2);
+//		catalog.commit(trans1);
+//		catalog.commit(trans2);
 		
 		for(int i = 1; i <= 100000; ++i){
-			String str = cellStu.search(i, null);
-			if(null != str){
-				System.out.println("search" + i + " : " + str);
+			Colunm colunm = cellStu.search(i, null);
+			if(null != colunm){
+				System.out.println("search" + i + " : " + colunm.getKey());
 			}
 		}
 	}
