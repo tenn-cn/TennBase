@@ -73,13 +73,14 @@ public class PageBufferMgr {
 	
 	public synchronized DBBlock nextBlock(Colunm colunm){
 		DBBlock blk = null;
-		blk = this.getBlock(colunm);
-
-		if(null == blk){
-			this.apppend();
+		if(colunm.len > 0 && (colunm.len + DBBlock.HEAD_SIZE) <= DBPage.MAX_BLOCK_SIZE){
 			blk = this.getBlock(colunm);
+	
+			if(null == blk){
+				this.apppend();
+				blk = this.getBlock(colunm);
+			}
 		}
-		
 		return blk;
 	}
 	
@@ -261,10 +262,10 @@ public class PageBufferMgr {
 			fd = this.fileMgr.pinFileChannel(PREFIX_DATA + this.dbName);
 	
 			if(null != fd){
-				long size0 = fd.getFileChannel().size();
+//				long size0 = fd.getFileChannel().size();
 				int pos = (int)(fd.getFileChannel().size()/DBPage.PAGE_SIZE) ;	
 				
-				System.out.println(size0 + ", " + size0/DBPage.PAGE_SIZE + ", " + size0 % DBPage.PAGE_SIZE );
+//				System.out.println(size0 + ", " + size0/DBPage.PAGE_SIZE + ", " + size0 % DBPage.PAGE_SIZE );
 				
 //				System.out.println(key + ", append.1, size = " + fd.getFileChannel().size() + ", pos = " + pos);
 				ByteBuffer[] array = new ByteBuffer[DBPage.NEW_PAGES_SIZE];

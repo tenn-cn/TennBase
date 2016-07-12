@@ -56,9 +56,13 @@ public class PageBuffer {
 	public  DBBlock nextBlock(Colunm colunm){
 		DBBlock blk = null;
 		if((this.offset + DBBlock.HEAD_SIZE + colunm.len) <= this.size){
-			blk = this.getBlock(this.offset);
-			blk.setColunm(colunm);
-			this.offset += DBBlock.HEAD_SIZE + colunm.len;
+			try{
+				blk = this.getBlock(this.offset);
+				blk.setColunm(colunm);
+				this.offset += (DBBlock.HEAD_SIZE + colunm.len);
+			}catch(Exception e){
+				System.out.println(e + " " + this.size + ", " + this.offset + ", " + colunm.len);
+			}
 		}
 		return blk;
 	}

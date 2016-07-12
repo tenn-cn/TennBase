@@ -19,7 +19,7 @@ public class BTreeNode {
 	protected final static int NODE_BRANCH = 0; 
 	protected final static int NODE_LEAF   = 1;
 	protected final static int NODE_ROOT   = 2;
-	protected final static int MAX_SIZE    = BStarTree.BALANCE_SIZE;
+	protected final static int MAX_SIZE    = RandomBStarTree.BALANCE_SIZE;
 	protected int[] keys;
     protected BTreeNode[] children;    
 	protected IdxBlock[] values;

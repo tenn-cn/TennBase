@@ -20,17 +20,17 @@ public class DBPage {
 	
 	  //pageid + size
 	public static final int HEAD_SIZE  = 0;//INT_SIZE + INT_SIZE ;
-	public static final int BLOCK_SIZE = ByteUtil.INT_SIZE;
+//	public static final int BLOCK_SIZE = ByteUtil.INT_SIZE;
 	
-	public static final int PAGE_SIZE  = 1024000;
+	public static final int PAGE_SIZE  = 1024 * 100;
 									//HEAD_SIZE +  
 									//(key + offset)*BALANCE_SIZE 48
 									//   BLOCK_SIZE * MAX_BLOCK_SIZE;
 
 	
+	public static final int MAX_BLOCK_SIZE = ByteUtil.SHORT_MAX_VALUE;
 	
-	
-	protected static final int NEW_PAGES_SIZE = 1;
+	protected static final int NEW_PAGES_SIZE = 10;
 
 	protected static final int PAGE_INDEX_SIZE = ByteUtil.INT_SIZE + ByteUtil.INT_SIZE;
 	

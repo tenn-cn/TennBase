@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import tenndb.bstar.BStarTree;
+import tenndb.bstar.RandomBStarTree;
 import tenndb.bstar.BTreeNode;
 import tenndb.bstar.IdxBlock;
 import tenndb.common.ByteUtil;
@@ -225,11 +225,11 @@ public class IndexMgr {
 			List<IndexPage> pageList = new ArrayList<IndexPage>();
 			if(null != bufferList && bufferList.size() > 0){
 
-				this.tree = BStarTree.buildBTree(this.dbName, this, this.transMgr, bufferList, pageList);
+				this.tree = RandomBStarTree.buildBTree(this.dbName, this, this.transMgr, bufferList, pageList);
 
 			}else{
 
-				this.tree = new BStarTree(this.dbName, this, this.transMgr);
+				this.tree = new RandomBStarTree(this.dbName, this, this.transMgr);
 /*				IndexPage page = this.appendNewIndexPage(this.tree.getRoot());
 				pageList.add(page);*/
 			}

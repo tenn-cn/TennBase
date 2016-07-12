@@ -1,6 +1,8 @@
 package tenndb.test;
 
 
+import java.util.Random;
+
 import tenndb.base.Catalog;
 import tenndb.base.Cell;
 import tenndb.base.TennBase;
@@ -32,10 +34,12 @@ public class TestTennBase {
 			long t1 = System.currentTimeMillis();
 				
 	//		cellStu.print();
-			for(int i = 1; i <= 200000; ++i){
+			for(int i = 1; i <= 100000; ++i){
+			//	Random r = new Random();
 				
-				String key = i + "_helloworld_";
-				
+			//	int p = r.nextInt(100000);
+			//  String key = "helloworld_" + p;
+				String key = "helloworld_" + i;
 				Colunm colunm = new Colunm(key, 1);
 				colunm.addFiled(new Filed("var1", key + 1));
 				colunm.addFiled(new Filed("var2", key + 2));
@@ -44,13 +48,15 @@ public class TestTennBase {
 				colunm.addFiled(new Filed("var5", key + 5));
 				colunm.addFiled(new Filed("var6", key + 6));
 				
-				cellStu.insert(colunm.getHashCode(), colunm);
+	    		cellStu.insert(colunm.getHashCode(), colunm);
 			}
+			
+			cellStu.print();
 			
 			{
 				int num = 0;
-				for(int i = 1; i <= 1000000; i*=10){
-					String key = i + "_helloworld_";
+				for(int i = 1; i <= 100000; i*=10){
+					String key = "helloworld_" + i;
 					
 					Colunm colunm = cellStu.search(key.hashCode());
 					if(null != colunm)

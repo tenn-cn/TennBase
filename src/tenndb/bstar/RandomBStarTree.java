@@ -17,7 +17,7 @@ import tenndb.tx.Trans;
 import tenndb.tx.TransMgr;
 
 
-public class BStarTree implements IBTree {
+public class RandomBStarTree implements IBTree {
 
 	public final static int BALANCE_SIZE = 256;
 	
@@ -38,7 +38,7 @@ public class BStarTree implements IBTree {
 	public void unLockWrite() { this.lock.writeLock().unlock(); }
 	
 	
-	public BStarTree(String dbName, IndexMgr indexMgr, TransMgr transMgr) {
+	public RandomBStarTree(String dbName, IndexMgr indexMgr, TransMgr transMgr) {
 		super();
 		this.dbName   = dbName;
 		this.size     = BALANCE_SIZE;
@@ -46,7 +46,7 @@ public class BStarTree implements IBTree {
 		this.transMgr = transMgr;
 	}
 	
-	public BStarTree(String dbName, IndexMgr indexMgr, TransMgr transMgr, BTreeNode root) {
+	public RandomBStarTree(String dbName, IndexMgr indexMgr, TransMgr transMgr, BTreeNode root) {
 		super();
 		this.dbName   = dbName;
 		this.size     = BALANCE_SIZE;
@@ -160,7 +160,7 @@ public class BStarTree implements IBTree {
 				}		
 			}
 			
-			tree = new BStarTree(dbName, indexMgr, tansMgr, rootNode);
+			tree = new RandomBStarTree(dbName, indexMgr, tansMgr, rootNode);
 		}
 		
 		return tree;

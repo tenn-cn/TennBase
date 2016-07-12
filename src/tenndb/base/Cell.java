@@ -196,6 +196,7 @@ public class Cell implements IBase{
 		return b;
 	}
 	
+	
 	@Override
 	public boolean update(int key, Colunm colunm, Trans tid) throws AbortTransException{
 		boolean b = false;		
