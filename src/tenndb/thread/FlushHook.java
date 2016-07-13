@@ -3,7 +3,7 @@ package tenndb.thread;
 import java.util.Date;
 
 import tenndb.base.Cell;
-import tenndb.bstar.RandomBStarTree;
+import tenndb.bstar.RandomInsertBStarTree;
 import tenndb.common.SystemTime;
 
 public class FlushHook extends Thread {
@@ -20,7 +20,7 @@ public class FlushHook extends Thread {
 		while(true){
 			try{
 				if(null != this.cell){
-					RandomBStarTree tree = (RandomBStarTree) this.cell.getIndex();
+					RandomInsertBStarTree tree = (RandomInsertBStarTree) this.cell.getIndex();
 					boolean next = false;
 					tree.lockWrite();
 					next = this.cell.flushNewPages();

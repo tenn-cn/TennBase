@@ -251,6 +251,7 @@ public class Cell implements IBase{
 			DBBlock bblk = this.pageMgr.getDBBlock(iblk.getPageID(), iblk.getOffset());
 			if(null != bblk){
 				colunm = bblk.getColunm();
+				colunm.setTime(iblk.getTime());
 			}else{
 
 			}

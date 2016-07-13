@@ -1,11 +1,14 @@
 package tenndb.test;
 
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 
 import tenndb.base.Catalog;
 import tenndb.base.Cell;
 import tenndb.base.TennBase;
+import tenndb.common.DateFormatUtil;
 import tenndb.data.Colunm;
 import tenndb.data.Filed;
 import tenndb.tx.AbortTransException;
@@ -13,11 +16,17 @@ import tenndb.tx.Trans;
 
 public class TestTennBase {
 
+
+	private static final ThreadLocal<SimpleDateFormat> LOG_DATE_FORMAT =
+		DateFormatUtil.threadLocalDateFormat("yyyy-MM-dd HH:mm:ss");
+	
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
 		Catalog catalog = TennBase.getCatalog();
+		
+		SimpleDateFormat df = LOG_DATE_FORMAT.get();
 		
 		String dbStudent    = "student";
 		String dbDepartment = "department";
@@ -34,12 +43,13 @@ public class TestTennBase {
 			long t1 = System.currentTimeMillis();
 				
 	//		cellStu.print();
-			for(int i = 1; i <= 100000; ++i){
-			//	Random r = new Random();
+			for(int i = 1; i <= 200000; ++i){
+	//		for(int i = 100000; i >= 1; --i){
+				Random r = new Random();
 				
-			//	int p = r.nextInt(100000);
-			//  String key = "helloworld_" + p;
-				String key = "helloworld_" + i;
+				int p = r.nextInt(10000000);
+			//    String key = "helloworld_" + p;
+				String key = "hello_" + i;
 				Colunm colunm = new Colunm(key, 1);
 				colunm.addFiled(new Filed("var1", key + 1));
 				colunm.addFiled(new Filed("var2", key + 2));
@@ -51,21 +61,22 @@ public class TestTennBase {
 	    		cellStu.insert(colunm.getHashCode(), colunm);
 			}
 			
-			cellStu.print();
+	//		cellStu.print();
 			
 			{
 				int num = 0;
-				for(int i = 1; i <= 100000; i*=10){
-					String key = "helloworld_" + i;
+				//for(int i = 1; i <= 100000; i*=10){
+				for(int i = 1; i <= 200000; ++i){					
+					String key = "hello_" + i;
 					
 					Colunm colunm = cellStu.search(key.hashCode());
 					if(null != colunm)
 					{
-						System.out.println("search" + i + " : " + colunm.getKey() + ", " + colunm.getVersion() + ", " + colunm.getLen());
+/*						System.out.println("search" + i + " : " + colunm.getKey() + ", " + df.format(new Date(colunm.getTime()*1000L)) + ", " + colunm.getVersion() + ", " + colunm.getLen());
 						for(int t = 0; t < colunm.getFileds().size(); ++t){
 							Filed filed = colunm.getFileds().get(t);
 							System.out.println("       " + filed.getName() + ", " + filed.getValue());
-						}
+						}*/
 					}
 					else{
 						++num;

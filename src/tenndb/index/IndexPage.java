@@ -3,7 +3,7 @@ package tenndb.index;
 
 import java.nio.ByteBuffer;
 
-import tenndb.bstar.RandomBStarTree;
+import tenndb.bstar.RandomInsertBStarTree;
 import tenndb.bstar.BTreeNode;
 import tenndb.bstar.IdxBlock;
 
@@ -16,7 +16,7 @@ public class IndexPage {
 	
 	public static final int PAGE_HEAD_SIZE  = BYTE_SIZE + INT_SIZE + INT_SIZE + INT_SIZE + INT_SIZE + INT_SIZE ;
 	public static final int PAGE_BLOCK_SIZE = INT_SIZE + INT_SIZE + INT_SIZE + INT_SIZE + BYTE_SIZE ;
-	public static final int PAGE_BODY_SIZE  = PAGE_BLOCK_SIZE * (RandomBStarTree.BALANCE_SIZE + 2);
+	public static final int PAGE_BODY_SIZE  = PAGE_BLOCK_SIZE * (RandomInsertBStarTree.BALANCE_SIZE + 2);
 	//(num,key,data) x86: (1 + 4 + 40)*20=900
 									//type + pageid + parentid + priorid + nextid + size
 	public static final int PAGE_SIZE = PAGE_HEAD_SIZE + PAGE_BODY_SIZE;

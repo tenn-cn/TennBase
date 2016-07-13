@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+import tenndb.common.ByteUtil;
+import tenndb.common.SystemTime;
 import tenndb.index.IndexPage;
 import tenndb.log.CellLogMgr;
 import tenndb.tx.AbortTransException;
@@ -19,7 +21,7 @@ public class BTreeNode {
 	protected final static int NODE_BRANCH = 0; 
 	protected final static int NODE_LEAF   = 1;
 	protected final static int NODE_ROOT   = 2;
-	protected final static int MAX_SIZE    = RandomBStarTree.BALANCE_SIZE;
+	protected final static int MAX_SIZE    = RandomInsertBStarTree.BALANCE_SIZE;
 	protected int[] keys;
     protected BTreeNode[] children;    
 	protected IdxBlock[] values;
@@ -234,11 +236,20 @@ public class BTreeNode {
 		}else{
 			String output = "[L";
 	        for( int i = 0; i < numKeys; ++i ){
-	            output += " " + keys[i] + ":" + values[i].pageID + ":" + values[i].offset + ", ";
+	        	long key = keys[i];
+	        	if(key < 0){
+	        		key += ByteUtil.INT_MAX_VALUE;
+	        	}
+	            output += " " + key + ":" + values[i].pageID + ":" + values[i].offset + ", ";
 	        }
 	        
-			if(null != next)
-				 output += "next = "+ next.keys[0] +": ";  
+			if(null != next){
+	        	long key = next.keys[0];
+	        	if(key < 0){
+	        		key += ByteUtil.INT_MAX_VALUE;
+	        	}
+				output += "next = "+ key +": ";
+			}
 			output += "]";
 			list.add(output);
 		}	
@@ -296,6 +307,7 @@ public class BTreeNode {
 		
 		this.values    = new IdxBlock[MAX_SIZE + 2];
 		this.values[0] = obj;
+		this.values[0].time = SystemTime.getSystemTime().currentTime();
 		this.isLeaf    = true;
 			
 		if(null != transMgr && null != tid && tid.getTransID() > 0){
@@ -363,43 +375,45 @@ public class BTreeNode {
 						BTreeNode[] newChildren = new BTreeNode[MAX_SIZE + 2];
 						
 						{
-							int from = (MAX_SIZE + 1)/2 + 1;
-							int to   = MAX_SIZE + 1;
-							int newLength = to - from; 
-							
-							for(int t = 0; t < newLength; ++t){
-					            if( t + from < to ) {
-					            	newKeys[t] = this.keys[from+t];
-					            } 
-					            else{
-					            	newKeys[t] = -1;
-					            }
+							{
+								int from = (MAX_SIZE + 1)/2 + 1;
+								int to   = MAX_SIZE + 1;
+								int newLength = to - from; 
+								
+								for(int t = 0; t < newLength; ++t){
+						            if( t + from < to ) {
+						            	newKeys[t] = this.keys[from+t];
+						            } 
+						            else{
+						            	newKeys[t] = -1;
+						            }
+								}
 							}
-						}
 						
-						{
-							int from = (MAX_SIZE + 2 + 1)/2;
-							int to   = MAX_SIZE + 2;
-							int newLength = to - from; 
-							
-							for(int t = 0; t < newLength; ++t){
-					            if( t + from < to ) {
-					            	newChildren[t] = this.children[from+t];
-					            }else{
-					            	newChildren[t] = null;
-					            }
+							{
+								int from = (MAX_SIZE + 2 + 1)/2;
+								int to   = MAX_SIZE + 2;
+								int newLength = to - from; 
+								
+								for(int t = 0; t < newLength; ++t){
+						            if( t + from < to ) {
+						            	newChildren[t] = this.children[from+t];
+						            }else{
+						            	newChildren[t] = null;
+						            }
+								}
 							}
+							
+							int newNum = (MAX_SIZE + 1)/2;
+							newNode = new BTreeNode(this.dbName, false, newNum, newKeys, null, newChildren, this.parent, this.next, this);
+					        for( int t = 0; t <= newNum ; ++t ) {
+					        	if(null != newNode.children[t])
+					        		newNode.children[t].parent = newNode;
+					        }
+					        
+					        this.numKeys = (MAX_SIZE + 1)/2;
+							this.next = newNode;
 						}
-						
-						int newNum = (MAX_SIZE + 1)/2;
-						newNode = new BTreeNode(this.dbName, false, newNum, newKeys, null, newChildren, this.parent, this.next, this);
-				        for( int t = 0; t <= newNum ; ++t ) {
-				        	if(null != newNode.children[t])
-				        		newNode.children[t].parent = newNode;
-				        }
-				        
-				        this.numKeys = (MAX_SIZE + 1)/2;
-						this.next = newNode;
 					}				
 				}
 			}
@@ -419,29 +433,56 @@ public class BTreeNode {
 		try{
 			this.lockWrite();			
 			if(this.isLeaf){
-				int from = MAX_SIZE/2;
-				int to   = MAX_SIZE;
-				int newLength = to - from;
 				
-				int[] newKeys = new int[MAX_SIZE + 1];
-				IdxBlock[] newValues = new IdxBlock[MAX_SIZE + 2];
-				
-				for(int i = 0; i < newLength; ++i){
-		            if( i + from < to ) {
-		            	newKeys[i]   = this.keys[from+i];
-		            	newValues[i] = this.values[from+i];
-		            } 
-				}
+				if(key > this.upperBound()){
+					int from = MAX_SIZE - 1;
+					int to   = MAX_SIZE;
+					int newLength = to - from;
+					
+					int[] newKeys = new int[MAX_SIZE + 1];
+					IdxBlock[] newValues = new IdxBlock[MAX_SIZE + 2];
+					
+					for(int i = 0; i < newLength; ++i){
+			            if( i + from < to ) {
+			            	newKeys[i]   = this.keys[from+i];
+			            	newValues[i] = this.values[from+i];
+			            } 
+					}
 
-				slVar.newRight = new BTreeNode(this.dbName, true, MAX_SIZE/2, newKeys, newValues, null, this.parent, this.next, this);
-				this.next = slVar.newRight;
-				this.numKeys = MAX_SIZE/2;
-				
-				if(key >= slVar.newRight.lowerBound()){
-					slVar.oldVar = slVar.newRight.addValue(key, value, transMgr, tid, logMgr);
+					slVar.newRight = new BTreeNode(this.dbName, true, 1, newKeys, newValues, null, this.parent, this.next, this);
+					this.next    = slVar.newRight;
+					this.numKeys = MAX_SIZE - 1;;
+					
+					if(key >= slVar.newRight.lowerBound()){
+						slVar.oldVar = slVar.newRight.addValue(key, value, transMgr, tid, logMgr);
+					}else{
+						slVar.oldVar = this.addValue(key, value, transMgr, tid, logMgr);
+					}
 				}else{
-					slVar.oldVar = this.addValue(key, value, transMgr, tid, logMgr);
-				}
+					int from = MAX_SIZE/2;
+					int to   = MAX_SIZE;
+					int newLength = to - from;
+					
+					int[] newKeys = new int[MAX_SIZE + 1];
+					IdxBlock[] newValues = new IdxBlock[MAX_SIZE + 2];
+					
+					for(int i = 0; i < newLength; ++i){
+			            if( i + from < to ) {
+			            	newKeys[i]   = this.keys[from+i];
+			            	newValues[i] = this.values[from+i];
+			            } 
+					}
+
+					slVar.newRight = new BTreeNode(this.dbName, true, MAX_SIZE/2, newKeys, newValues, null, this.parent, this.next, this);
+					this.next = slVar.newRight;
+					this.numKeys = MAX_SIZE/2;
+					
+					if(key >= slVar.newRight.lowerBound()){
+						slVar.oldVar = slVar.newRight.addValue(key, value, transMgr, tid, logMgr);
+					}else{
+						slVar.oldVar = this.addValue(key, value, transMgr, tid, logMgr);
+					}
+				}				
 			}
 		}catch(Exception e){}
 		finally{
@@ -507,16 +548,14 @@ public class BTreeNode {
 				}
 				
 				if(i != this.numKeys && this.keys[i] == key){
-//					System.out.println("addValue.1 " + key);
+
 					if(null != transMgr && null != tid && tid.getTransID() > 0){
 						BlkID bid = new BlkID(this.dbName, key);
 						
-//						System.out.println("addValue.2 " + key);
 						var.inserted = false;
 						logMgr.logUpdate(tid, key, newValue, this.values[i]);
 						if(transMgr.lockBlk(bid, tid)){							
 							
-//							System.out.println("addValue.3 " + key);
 							var.oldValue   = this.values[i];
 							this.values[i] = newValue;
 							var.inserted   = true;
@@ -526,6 +565,7 @@ public class BTreeNode {
 							this.values[i].tag     = IdxBlock.VALID;
 							this.values[i].newTag  = IdxBlock.VALID;
 							this.values[i].old     = var.oldValue;
+							this.values[i].time    = SystemTime.getSystemTime().currentTime();
 							transMgr.setTransState(tid, Trans.ACTIVE);
 						}else{
 							transMgr.setTransState(tid, Trans.ROLLBACK);
@@ -534,11 +574,12 @@ public class BTreeNode {
 					}else{
 						if(false == this.values[i].drity){
 							
-							var.oldValue   = this.values[i];
-							this.values[i] = newValue;
-							var.inserted   = true;
+							var.oldValue   		= this.values[i];
+							this.values[i] 		= newValue;
+							this.values[i].time = SystemTime.getSystemTime().currentTime();
+							var.inserted   		= true;
 							
-							this.values[i].tag   = IdxBlock.VALID;						
+							this.values[i].tag  = IdxBlock.VALID;						
 						}else{
 							var.inserted = false;
 						}
@@ -567,7 +608,7 @@ public class BTreeNode {
 							this.values[i].old    = null;
 							this.values[i].tag    = IdxBlock.INVALID;
 							this.values[i].newTag = IdxBlock.VALID;
-							
+							this.values[i].time   = SystemTime.getSystemTime().currentTime();
 							this.numKeys++;	
 							var.inserted = true;
 			
@@ -577,8 +618,9 @@ public class BTreeNode {
 						}
 					}else{
 //						System.out.println("addValue.0 " + key);
-						this.keys[i]   = key;
-						this.values[i] = newValue;
+						this.keys[i]   		= key;
+						this.values[i] 		= newValue;
+						this.values[i].time = SystemTime.getSystemTime().currentTime();
 						
 						this.numKeys++;	
 						var.inserted = true;
@@ -652,7 +694,7 @@ public class BTreeNode {
 								this.values[i].tid     = tid.getTransID();
 								this.values[i].tag     = IdxBlock.VALID;
 								this.values[i].newTag  = IdxBlock.INVALID;
-								
+								this.values[i].time    = SystemTime.getSystemTime().currentTime();
 								this.values[i].old     = oldObj;
 								transMgr.setTransState(tid, Trans.ACTIVE);
 							}else{
@@ -718,6 +760,8 @@ public class BTreeNode {
 								this.values[i].tag     = IdxBlock.VALID;
 								this.values[i].newTag  = IdxBlock.VALID;
 								this.values[i].old     = oldObj;
+								this.values[i].time    = SystemTime.getSystemTime().currentTime();
+								
 								transMgr.setTransState(tid, Trans.ACTIVE);
 							}else{
 								transMgr.setTransState(tid, Trans.ROLLBACK);
@@ -818,7 +862,7 @@ public class BTreeNode {
 							this.values[i].drity = false;
 							this.values[i].tag   = this.values[i].newTag;
 							this.values[i].tid   = 0;
-							
+							this.values[i].time  = SystemTime.getSystemTime().currentTime();
 							value = this.values[i].copyData();							
 							value.idxOffset = i;
 						}

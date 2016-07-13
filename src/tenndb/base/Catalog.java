@@ -28,14 +28,12 @@ public class Catalog {
     protected Map<String, Cell>   tabNameToCells = null;
     protected Map<Integer, Cell>  tabIdToCells = null;
    
-    
-    
 	protected final ReadWriteLock lock = new ReentrantReadWriteLock(false);
 
-	public Catalog(){
-		this.cataName = "tennbase";
-		this.root     = "J:\\tennbase";
-		this.fileMgr  = new FileMgr(this.root);
+	public Catalog(String root){
+		this.cataName       = "tennbase";
+		this.root           = root;
+		this.fileMgr        = new FileMgr(this.root);
 		
 		this.logMgr   		= new LogMgr(this.cataName, this.root);
 		this.bufMgr   		= new ByteBufferMgr(DBPage.PAGE_SIZE);
@@ -43,7 +41,7 @@ public class Catalog {
 		this.tabIdToCells   = new Hashtable<Integer, Cell>();
 		this.transMgr 		= new TransMgr();
 	}
-	
+
 	public Trans beginTrans(){
 		Trans trans = new Trans();
 		
@@ -55,8 +53,8 @@ public class Catalog {
 		
 	public void recover(){
 		this.logMgr.recover(this);
-		
 	}
+	
 	public void flush(){
 		
 		try{
@@ -145,9 +143,8 @@ public class Catalog {
 		if(!tabNameToCells.containsKey(dbName)){
 			Cell cell = new Cell(dbName, dbID, this.fileMgr, this.transMgr, this.logMgr);
 			cell.init();
-			System.out.println("addCell " + dbName);
-//			cell.print();
-			
+//			System.out.println("addCell " + dbName);
+
 			try{
 				this.lockWrite();
 				this.tabNameToCells.put(dbName, cell);
@@ -169,13 +166,11 @@ public class Catalog {
 		return this.tabNameToCells.get(dbName);
 	}
 	
-	protected void lockRead()    { this.lock.readLock().lock(); }
+	protected void lockRead()    { this.lock.readLock().lock();    }
 	
-	protected void unLockRead()  { this.lock.readLock().unlock(); }
+	protected void unLockRead()  { this.lock.readLock().unlock();  }
 
-	protected void lockWrite()   { this.lock.writeLock().lock(); }
+	protected void lockWrite()   { this.lock.writeLock().lock();   }
 	
 	protected void unLockWrite() { this.lock.writeLock().unlock(); }
-	
-	
 }

@@ -2,9 +2,6 @@ package tenndb.bstar;
 
 import java.nio.ByteBuffer;
 
-import tenndb.common.SystemTime;
-
-
 public class IdxBlock {
 
 	protected int tabId;
@@ -87,7 +84,7 @@ public class IdxBlock {
 		this.key         = key;
 		this.pageID      = 0;
 		this.offset      = 0;
-		this.time        = SystemTime.getSystemTime().currentTime();
+		this.time        = 0;
 		this.drity       = false;
 		this.tid         = 0;
 		this.tag         = VALID;

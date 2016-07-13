@@ -13,7 +13,9 @@ public class Colunm {
 	protected int         len;
 	protected int         version;
 	protected List<Filed> fileds;
-
+	
+	protected int         time;
+	
 	public Colunm(String key, int version) {
 		super();		
 		this.key      = key;
@@ -25,8 +27,6 @@ public class Colunm {
 		this.addFiled(new Filed("key", key));
 	}
 	
-
-	
 	public static final int hashCode(String value){
 		int hashCode = 0;
 		if(null != value && value.length() > 0){
@@ -35,6 +35,14 @@ public class Colunm {
 		return hashCode;
 	}
 	
+	public int getTime() {
+		return time;
+	}
+
+	public void setTime(int time) {
+		this.time = time;
+	}
+
 	public int getLen(){
 		return len;
 	}

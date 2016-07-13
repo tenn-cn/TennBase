@@ -12,12 +12,11 @@ public class TennBase {
     protected final ShutdownHook shutdown;
     
 	private TennBase(){
-		this.catalog = new Catalog();
+		String root = "J:\\tennbase";
+		this.catalog = new Catalog(root);
 		this.catalog.recover();
 		this.shutdown = new ShutdownHook(this.catalog);
-    	Runtime.getRuntime().addShutdownHook(this.shutdown);
-    	
-    	
+    	Runtime.getRuntime().addShutdownHook(this.shutdown);    	
 	}
 
 	public static Catalog getCatalog(){
