@@ -46,6 +46,10 @@ public class Cell implements IBase{
 		this.indexMgr = new IndexMgr(this.dbName, fileMgr, transMgr);
 	}
 	
+	public String getDbName() {
+		return dbName;
+	}
+
 	public final IBTree getIndex() {
 		return index;
 	}

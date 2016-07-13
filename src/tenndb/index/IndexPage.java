@@ -33,6 +33,10 @@ public class IndexPage {
 		this.buffer = buffer;
 	}
 	
+	public ByteBuffer getBuffer() {
+		return buffer;
+	}
+
 	public IdxBlock getBlock(int index){
 		return this.node.getBlock(index);
 	}

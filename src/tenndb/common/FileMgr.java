@@ -26,7 +26,10 @@ public class FileMgr {
 		}
 		
 		if(!dir.exists()){
-			if(!dir.mkdir()){
+			
+			FileUtil.mkDir(dir);
+			
+			if(!dir.exists()){
 				throw new RuntimeException("cannot create " + instName);
 			}
 		}

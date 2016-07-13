@@ -29,11 +29,11 @@ public class RandomInsertBStarTree implements IBTree {
 	
 	protected ReadWriteLock lock = new ReentrantReadWriteLock(false);
 	
-	public void lockRead()    { this.lock.readLock().lock(); }
+	public void lockRead()    { this.lock.readLock().lock();    }
 	
-	public void unLockRead()  { this.lock.readLock().unlock(); }
+	public void unLockRead()  { this.lock.readLock().unlock();  }
 
-	public void lockWrite()   { this.lock.writeLock().lock(); }
+	public void lockWrite()   { this.lock.writeLock().lock();   }
 	
 	public void unLockWrite() { this.lock.writeLock().unlock(); }
 	
