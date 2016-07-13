@@ -4,7 +4,6 @@ import java.text.SimpleDateFormat;
 import java.util.Locale;
 import java.util.TimeZone;
 
-
 public class DateFormatUtil {
 	
 	private static final String GMT_TIME_ZONE = "GMT+08:00".intern();

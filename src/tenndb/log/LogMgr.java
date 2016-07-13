@@ -18,6 +18,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import tenndb.base.Catalog;
 import tenndb.base.Cell;
 import tenndb.bstar.IdxBlock;
+import tenndb.common.FileUtil;
 import tenndb.tx.Trans;
 
 public class LogMgr {
@@ -176,6 +177,12 @@ public class LogMgr {
 	}
 	
 	public LogMgr(String cataName, String root){
+		File dir     = new File(root);
+		
+		if(!dir.exists()){
+			FileUtil.mkDir(dir);
+		}
+		
 		File file    = new File(root, PREFIX_LOG + cataName);
 		this.logFile = file;
 		this.logging = true;

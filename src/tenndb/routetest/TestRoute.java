@@ -1,7 +1,6 @@
 package tenndb.routetest;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -22,12 +21,11 @@ public class TestRoute {
 		RouteMgr mgr = new RouteMgr("J:\\tennbase");
 		mgr.init();
 		
-//		Cell c160713 = mgr.pinLevel1("160713");
 		String date = "160713";
 		Map<String, Cell> map = new Hashtable<String, Cell>();
 		List<Cell> list = new ArrayList<Cell>();
 		
-		for(int i = 0; i < 100; ++i)
+		for(int i = 0; i < 300; ++i)
 		{
 			long dev = 1607130000 + i;
 			String level2 = String.valueOf(dev);

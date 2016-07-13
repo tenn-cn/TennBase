@@ -1,20 +1,17 @@
 package tenndb.route;
 
-import java.text.SimpleDateFormat;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import tenndb.base.Cell;
-import tenndb.common.DateFormatUtil;
 import tenndb.common.FileMgr;
 import tenndb.data.ByteBufferMgr;
 import tenndb.data.Colunm;
 import tenndb.data.DBPage;
 import tenndb.log.LogMgr;
 import tenndb.tx.TransMgr;
-
 
 
 public class RouteMgr {
@@ -34,19 +31,22 @@ public class RouteMgr {
     protected volatile boolean initialized = false;
 	protected final ReadWriteLock lock = new ReentrantReadWriteLock(false);
 	
-	private static final ThreadLocal<SimpleDateFormat> DATA_PATH_FORMAT =
-		DateFormatUtil.threadLocalDateFormat("yyyy" + System.getProperty("file.separator") + "MM"+ System.getProperty("file.separator") + "dd");
+	public static final String LOGS_PATH = System.getProperty("file.separator") + "logs_data";
+	
+	public static final String ROUTE_PATH = System.getProperty("file.separator") + "route_data";
+
+	public static final String DATA_PATH = System.getProperty("file.separator") + "raw_data";
 	
 	public RouteMgr(String root){
 		this.cataName       = "date_route";
 		this.root           = root;
 		this.rootMgr        = new FileMgr(this.root);
 		
-		this.logMgr   		= new LogMgr(this.cataName, this.root);
+		this.logMgr   		= new LogMgr(this.cataName, this.root + LOGS_PATH);
 		this.bufMgr   		= new ByteBufferMgr(DBPage.PAGE_SIZE);
 		this.transMgr 		= new TransMgr();
 		
-		this.level0         = new Cell(this.cataName, 0, this.rootMgr, this.transMgr, this.logMgr);
+		this.level0         = new Cell(this.cataName, 0, new FileMgr(this.root + ROUTE_PATH), this.transMgr, this.logMgr);
 		this.level1         = new Hashtable<String, Cell>();
 		this.level2         = new Hashtable<String, Cell>();
 	}
@@ -57,6 +57,7 @@ public class RouteMgr {
 				this.lock.writeLock().lock();
 				if(false == this.initialized){
 					this.level0.init();
+					this.initialized = true;
 				}
 			}catch(Exception e){
 				System.out.println(e);
@@ -65,6 +66,7 @@ public class RouteMgr {
 			}
 		}
 	}
+	
 	public final Cell getLevel0(){
 		return this.level0;
 	}
@@ -85,7 +87,8 @@ public class RouteMgr {
 		String path = null;
 		
 		if(null != dev && dev.length() == 10){
-			path = System.getProperty("file.separator") + dev.substring(8, 10) ;
+			path = System.getProperty("file.separator") + dev.substring(8, 10) 
+			     + System.getProperty("file.separator") + dev.substring(0,  8);
 		}
 		
 		return path;
@@ -111,7 +114,7 @@ public class RouteMgr {
 						String datepath = data2path(level1);
 						String devpath  = dev2path (level2);
 						//dev2path
-						cell2 = new Cell(key2, 0, new FileMgr(this.root + datepath + devpath), this.transMgr, this.logMgr);	
+						cell2 = new Cell(key2, 0, new FileMgr(this.root + DATA_PATH + datepath + devpath), this.transMgr, this.logMgr);	
 						cell2.init();
 						this.level2.put(key2, cell2);
 					}
@@ -140,7 +143,7 @@ public class RouteMgr {
 					String key = colunm.getKey();
 					if(null != key){
 						String path = data2path(key);
-						cell = new Cell(key, 0, new FileMgr(this.root + path), this.transMgr, this.logMgr);	
+						cell = new Cell(key, 0, new FileMgr(this.root + DATA_PATH + path), this.transMgr, this.logMgr);	
 						cell.init();
 						this.level1.put(key, cell);
 					}			
