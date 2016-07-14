@@ -10,7 +10,9 @@ import tenndb.common.FileMgr;
 import tenndb.data.ByteBufferMgr;
 import tenndb.data.Colunm;
 import tenndb.data.DBPage;
+import tenndb.dist.DistMgr;
 import tenndb.log.LogMgr;
+import tenndb.thread.ImportThread;
 import tenndb.tx.TransMgr;
 
 
@@ -28,14 +30,18 @@ public class RouteMgr {
 	protected final TransMgr      transMgr;
     protected final ByteBufferMgr bufMgr;
     
-    protected volatile boolean initialized = false;
+	protected ImportThread importThread = null;
+	
 	protected final ReadWriteLock lock = new ReentrantReadWriteLock(false);
 	
-	public static final String LOGS_PATH = System.getProperty("file.separator") + "logs_data";
+    protected volatile boolean initialized = false;
+    
+	public static final String LOGS_PATH  = System.getProperty("file.separator") + "logs_data";
 	
 	public static final String ROUTE_PATH = System.getProperty("file.separator") + "route_data";
 
-	public static final String DATA_PATH = System.getProperty("file.separator") + "raw_data";
+	public static final String DATA_PATH  = System.getProperty("file.separator") + "raw_data";
+
 	
 	public RouteMgr(String root){
 		this.cataName       = "date_route";
@@ -54,15 +60,17 @@ public class RouteMgr {
 	public void init(){
 		if(false == this.initialized){
 			try{
-				this.lock.writeLock().lock();
+				this.lockWrite();
 				if(false == this.initialized){
 					this.level0.init();
+					this.importThread = new ImportThread(new FileMgr(this.root + DistMgr.DIST_PATH), this);
+					this.importThread.start();
 					this.initialized = true;
 				}
 			}catch(Exception e){
 				System.out.println(e);
 			}finally{
-				this.lock.writeLock().unlock();
+				this.unLockWrite();
 			}
 		}
 	}
@@ -73,11 +81,11 @@ public class RouteMgr {
 	
 	public static final String data2path(String date){
 		String path = null;
-		
-		if(null != date && date.length() == 6){
-			path = System.getProperty("file.separator") + date.substring(0, 2) 
-			     + System.getProperty("file.separator") + date.substring(2, 4) 
-			     + System.getProperty("file.separator") + date.substring(4, 6) ;
+		//20160701
+		if(null != date && date.length() == 8){
+			path = System.getProperty("file.separator") + date.substring(0, 4) 
+			     + System.getProperty("file.separator") + date.substring(4, 6) 
+			     + System.getProperty("file.separator") + date.substring(6, 8) ;
 		}
 		
 		return path;
@@ -96,32 +104,57 @@ public class RouteMgr {
 	
 	public final Cell pinLevel2(String level1, String level2){
 		Cell cell2 = null;
-		String key = level1 + "_" + level2;
-		cell2 = this.level2.get(key);
 		
-		if(null == cell2){
-			Cell cell1 = this.pinLevel1(level1);
-			if(null != cell1){
-				Colunm colunm = cell1.search(Colunm.hashCode(level2));
-				if(null == colunm){
-					colunm = new Colunm(key, 1);						
-					cell1.insert(colunm.getHashCode(), colunm);
-				}
+		try{
+			if(null != level1 && level1.length() > 0 && null != level2 && level2.length() > 0){
+				String key = level1 + "_" + level2;
+
+//				this.lockRead();
+				cell2 = this.level2.get(key);
+//				this.unLockRead();
 				
-				if(null != colunm){
-					String key2 = colunm.getKey();
-					if(null != key2){
-						String datepath = data2path(level1);
-						String devpath  = dev2path (level2);
-						//dev2path
-						cell2 = new Cell(key2, 0, new FileMgr(this.root + DATA_PATH + datepath + devpath), this.transMgr, this.logMgr);	
-						cell2.init();
-						this.level2.put(key2, cell2);
+				if(null == cell2){
+					Cell cell1 = this.pinLevel1(level1);
+					if(null != cell1){
+
+						Colunm colunm = cell1.search(Colunm.hashCode(level2));
+						if(null == colunm){
+							colunm = new Colunm(level2, 1);						
+							cell1.insert(colunm.getHashCode(), colunm);
+						}
+						
+						if(null != colunm){
+
+							String key2 = colunm.getKey();
+							if(null != key2){
+								String datepath = data2path(level1);
+								String devpath  = dev2path (level2);
+								//dev2path
+								cell2 = new Cell(key2, 0, new FileMgr(this.root + DATA_PATH + datepath + devpath), this.transMgr, this.logMgr);	
+								cell2.init();
+
+								try{
+//									this.unLockRead();
+									this.lockWrite();
+									this.level2.put(key, cell2);	
+								}catch(Exception e){
+									System.out.println(e);
+								}
+								finally{
+									this.unLockWrite();
+//									this.lockRead();
+								}
+							}
+						}
 					}
 				}
-			}
+			}									
+		}catch(Exception e){
+			System.out.println(e);
+		}finally{
+//			this.unLockRead();
 		}
-
+		
 		return cell2;
 	}
 	
@@ -129,28 +162,45 @@ public class RouteMgr {
 	public final Cell pinLevel1(String level1){
 		
 		Cell cell = null;
-				
-		if(null != level1 && level1.length() > 0){
-			cell = this.level1.get(level1);
-			if(null == cell){
-				Colunm colunm = this.level0.search(Colunm.hashCode(level1));
-				if(null == colunm){
-					colunm = new Colunm(level1, 1);						
-					this.level0.insert(colunm.getHashCode(), colunm);
-				}
-				
-				if(null != colunm){
-					String key = colunm.getKey();
-					if(null != key){
-						String path = data2path(key);
-						cell = new Cell(key, 0, new FileMgr(this.root + DATA_PATH + path), this.transMgr, this.logMgr);	
-						cell.init();
-						this.level1.put(key, cell);
-					}			
-				}
-			}
-		}
 		
+		try{
+			if(null != level1 && level1.length() > 0){
+//				this.lockRead();
+				
+				cell = this.level1.get(level1);
+				if(null == cell){
+					Colunm colunm = this.level0.search(Colunm.hashCode(level1));
+					if(null == colunm){
+						colunm = new Colunm(level1, 1);						
+						this.level0.insert(colunm.getHashCode(), colunm);
+					}
+					
+					if(null != colunm){
+						String key = colunm.getKey();
+						if(null != key){
+							String path = data2path(key);
+							cell = new Cell(key, 0, new FileMgr(this.root + DATA_PATH + path), this.transMgr, this.logMgr);	
+							cell.init();
+							try{
+//								this.unLockRead();
+								this.lockWrite();
+								this.level1.put(key, cell);	
+							}catch(Exception e){
+								System.out.println(e);
+							}
+							finally{
+								this.unLockWrite();
+//								this.lockRead();
+							}
+						}			
+					}
+				}
+			}			
+		}catch(Exception e){
+			System.out.println(e);
+		}finally{
+//			this.unLockRead();
+		}
 		return cell;
 	}
 	

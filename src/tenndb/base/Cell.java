@@ -2,6 +2,8 @@ package tenndb.base;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import tenndb.IBase;
 import tenndb.bstar.IdxBlock;
@@ -35,6 +37,13 @@ public class Cell implements IBase{
 	
 	protected FlushHook flushHook = null;
 	
+	
+	
+	protected final ReadWriteLock lock = new ReentrantReadWriteLock(false);
+	
+    protected volatile boolean initialized = false;
+    
+    
 	public Cell(String dbName, int tabID, FileMgr fileMgr, TransMgr transMgr, LogMgr logMgr) {
 		super();
 		this.dbName   = dbName;
@@ -55,12 +64,25 @@ public class Cell implements IBase{
 	}
 
 	public void init(){
-		this.indexMgr.load();
-		this.pageMgr.load();
-		this.index = this.indexMgr.getBTree();
-		
-		this.flushHook = new FlushHook(this);
-		this.flushHook.start();
+		if(false == this.initialized){
+			try{
+				this.lockWrite();
+				if(false == this.initialized){
+					this.indexMgr.load();
+					this.pageMgr.load();
+					this.index = this.indexMgr.getBTree();
+					
+					this.flushHook = new FlushHook(this);
+					this.flushHook.start();
+					
+					this.initialized = true;
+				}
+			}catch(Exception e){
+				System.out.println(e);
+			}finally{
+				this.unLockWrite();
+			}
+		}
 	}
 	
 	public boolean flushNewPages(){
@@ -95,9 +117,9 @@ public class Cell implements IBase{
 	@Override
 	public boolean insert(int key, byte[] buff, int offset, int len){
 		boolean b = false;
-		if(null != buff && buff.length > 0 && offset >= 0 && len >= 0 && (offset + len) <= buff.length){
+		if(null != buff && buff.length > 0 && offset >= 0 && len > 0 && (offset + len) <= buff.length){
 
-			DBBlock bblk = this.pageMgr.nextDBBlock(key, 0, buff, offset, len);
+			DBBlock bblk = this.pageMgr.nextDBBlock(key, 1, buff, offset, len);
 
 			if(null != bblk){
 				
@@ -312,8 +334,6 @@ public class Cell implements IBase{
 			if(null != bblk){
 				colunm = bblk.getColunm();
 				colunm.setTime(iblk.getTime());
-			}else{
-
 			}
 		}
 		return colunm;
@@ -347,4 +367,12 @@ public class Cell implements IBase{
 		return bbList;
 	}
 
+	
+	protected void lockRead()    { this.lock.readLock().lock();    }
+	
+	protected void unLockRead()  { this.lock.readLock().unlock();  }
+
+	protected void lockWrite()   { this.lock.writeLock().lock();   }
+	
+	protected void unLockWrite() { this.lock.writeLock().unlock(); }
 }

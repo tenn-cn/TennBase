@@ -6,7 +6,9 @@ import java.nio.ByteBuffer;
 
 public class DistPage {
 //
-	public static final int PAGE_SIZE = 1024 * 1000 * 10;
+//	public static final int PAGE_SIZE = 1024 * 1000 * 10;
+	
+	public static final int PAGE_SIZE = 1024 * 40;
 	
 	protected ByteBuffer buffer;
 	
