@@ -8,6 +8,10 @@ import tenndb.tx.Trans;
 
 public interface IBase {
 	
+	public boolean insert(int key, byte[] buff, int offset, int len);
+	
+	public boolean update(int key, byte[] buff, int offset, int len);
+
 	
 	public boolean insert(int key, Colunm colunm);
 	

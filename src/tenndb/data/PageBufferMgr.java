@@ -48,26 +48,60 @@ public class PageBufferMgr {
 		this.bufMgr      = new ByteBufferMgr(DBPage.PAGE_SIZE);
 	}
 	
+	protected DBBlock getBlock(int hashCode, int version, byte[] buff, int offset, int len){
+		DBBlock blk = null;
+		PageBuffer page = this.unusedQueue.peek();
+
+		if(null != page){
+
+			if(page.isfull(len)){	
+	
+				PageBuffer full = this.unusedQueue.poll();
+				this.usedList.add(full);
+				this.unusedMap.remove(page.pageID);
+				page = this.unusedQueue.peek();
+			}
+			
+			if(null != page){
+				blk = page.nextBlock(hashCode, version, buff, offset, len);
+			}
+		}
+		
+		return blk;
+	}
+	
 	protected DBBlock getBlock(Colunm colunm){
 		DBBlock blk = null;
 		PageBuffer page = this.unusedQueue.peek();
 
 		if(null != page){
 
-			if(page.isfull(colunm)){	
+			if(page.isfull(colunm.len)){	
 	
 				PageBuffer full = this.unusedQueue.poll();
 				this.usedList.add(full);
 				this.unusedMap.remove(page.pageID);
 				page = this.unusedQueue.peek();
-			}else{
-
 			}
 			
 			if(null != page){
 				blk = page.nextBlock(colunm);
 			}
 		}
+		return blk;
+	}
+	
+	public synchronized DBBlock nextBlock(int hashCode, int version, byte[] buff, int offset, int len){
+		DBBlock blk = null;
+		if(null != buff && buff.length > 0 && (len + DBBlock.HEAD_SIZE) <= DBPage.MAX_BLOCK_SIZE){
+			blk = this.getBlock(hashCode, version, buff, offset, len);
+			
+			if(null == blk){
+				this.apppend();
+				blk = this.getBlock(hashCode, version, buff, offset, len);
+			}
+		}		
+		
 		return blk;
 	}
 	
@@ -81,6 +115,7 @@ public class PageBufferMgr {
 				blk = this.getBlock(colunm);
 			}
 		}
+		
 		return blk;
 	}
 	

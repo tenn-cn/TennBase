@@ -99,6 +99,29 @@ public class DBBlock {
 		}
 	}
 	
+	public void setVar(int hashCode, int version, byte[] buff, int offset, int len){
+		
+		if(null != buff && buff.length > 0 && len > 0 && offset >= 0 && (offset + len) <= buff.length){
+			
+			synchronized(this.page){
+				this.page.buffer.rewind();
+				this.page.buffer.position(DBPage.HEAD_SIZE + this.offset);
+				//dword  key
+				//word   version
+				//word   len
+				//byte[] buff
+				this.page.buffer.putInt(hashCode);
+				byte[] vers = ByteUtil.shortToByte2_big(version);				
+				this.page.buffer.put(vers);
+
+				byte[] lens = ByteUtil.shortToByte2_big(len);	
+				this.page.buffer.put(lens);
+				
+				this.page.buffer.put(buff, offset, len);	
+			}
+		}
+	}
+	
 	public void setVar(int hashCode, int version, int len, List<Filed> fileds){
 
 		if(null != fileds && version >= 0){
@@ -107,12 +130,12 @@ public class DBBlock {
 				this.page.buffer.rewind();
 				this.page.buffer.position(DBPage.HEAD_SIZE + this.offset);
 				//dword key
-				//word len
-				//word version
-				//word filed1_len
-				//word filed1_buff
-				//word filed2_len
-				//word filed2_buff
+				//word  version
+				//word  len
+				//word  filed1_len
+				//word  filed1_buff
+				//word  filed2_len
+				//word  filed2_buff
 				this.page.buffer.putInt(hashCode);
 				
 				byte[] vers = ByteUtil.shortToByte2_big(version);				

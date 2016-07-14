@@ -194,17 +194,17 @@ public class IndexMgr {
 			FileDeco fd = this.fileMgr.pinFileChannel(PREFIX_INDEX + this.dbName);
 			long len = fd.getFileChannel().size();
 			System.out.println(PREFIX_INDEX + this.dbName + " len = " + len);
-			if(len >= IndexPage.INT_SIZE){
+			if(len >= ByteUtil.INT_SIZE){
 				fd.getFileChannel().position(0);
-				ByteBuffer buff = ByteBuffer.allocate(IndexPage.INT_SIZE);
+				ByteBuffer buff = ByteBuffer.allocate(ByteUtil.INT_SIZE);
 				fd.getFileChannel().read(buff);
 				buff.rewind();
 				this.counter.set(buff.getInt());
 				
 				System.out.println("load counter = " + this.counter.get());
 			}
-			if(len >= IndexPage.PAGE_SIZE + IndexPage.INT_SIZE){
-				int size = (int) ((len - IndexPage.INT_SIZE) / IndexPage.PAGE_SIZE);
+			if(len >= IndexPage.PAGE_SIZE + ByteUtil.INT_SIZE){
+				int size = (int) ((len - ByteUtil.INT_SIZE) / IndexPage.PAGE_SIZE);
 				
 				System.out.println("load size = " + size + ", len = " + len);
 				
@@ -217,7 +217,7 @@ public class IndexMgr {
 						bufferList.add(buffer);								
 					}
 					
-					fd.getFileChannel().position(IndexPage.INT_SIZE);
+					fd.getFileChannel().position(ByteUtil.INT_SIZE);
 					fd.getFileChannel().read(array);								
 				}
 			}
@@ -265,7 +265,7 @@ public class IndexMgr {
 					fd.getFileChannel().truncate(0);
 					fd.getFileChannel().position(0);
 					
-					ByteBuffer buff = ByteBuffer.allocate(IndexPage.INT_SIZE);
+					ByteBuffer buff = ByteBuffer.allocate(ByteUtil.INT_SIZE);
 					buff.putInt(this.counter.get());
 					buff.position(0);
 					System.out.println("flush counter = " + this.counter.get());

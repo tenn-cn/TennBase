@@ -49,8 +49,23 @@ public class PageBuffer {
 		return size;
 	}
 	
-	public  boolean isfull(Colunm colunm){
-		return (this.offset + DBBlock.HEAD_SIZE + colunm.len) > this.size;
+	public  boolean isfull(int len){
+		return (this.offset + DBBlock.HEAD_SIZE + len) > this.size;
+	}
+	
+	public  DBBlock nextBlock(int hashCode, int version, byte[] buff, int offset, int len){
+		DBBlock blk = null;
+		if(null != buff && buff.length > 0 && (this.offset + DBBlock.HEAD_SIZE + len) <= this.size){
+			try{
+				blk = this.getBlock(this.offset);
+				blk.setVar(hashCode, version, buff, offset, len);
+				this.offset += (DBBlock.HEAD_SIZE + len);
+			}catch(Exception e){
+				System.out.println(e + " " + this.size + ", " + this.offset + ", " + len);
+			}
+		}
+		
+		return blk;
 	}
 	
 	public  DBBlock nextBlock(Colunm colunm){

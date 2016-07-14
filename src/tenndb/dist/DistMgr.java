@@ -1,7 +1,5 @@
-package tenndb.distribution;
+package tenndb.dist;
 
-import java.util.Hashtable;
-import java.util.Map;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 

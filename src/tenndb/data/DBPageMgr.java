@@ -50,6 +50,16 @@ public class DBPageMgr {
 		return blk;
 	}
 	
+	public DBBlock nextDBBlock(int hashCode, int version, byte[] buff, int offset, int len){
+		DBBlock blk = null;
+		
+		if(null != buff && buff.length > 0 && offset >= 0 && len >= 0 && (offset + len) <= buff.length){
+			this.pageMgr.nextBlock(hashCode, version, buff, offset, len);
+		}
+		
+		return blk;
+	}
+	
 	public DBBlock nextDBBlock(Colunm colunm){
 
 		return this.pageMgr.nextBlock(colunm);

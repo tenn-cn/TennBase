@@ -87,7 +87,7 @@ public class FileUtil
 	
 	public static final void writeFile(String fullFilePath, List<String> list)
 	{
-		if(null != list && list.size() > 0)
+		if(null != fullFilePath && fullFilePath.length() > 0 && null != list && list.size() > 0)
 		{
 			File file = null;
 			FileWriter fw = null;

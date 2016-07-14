@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -35,6 +36,10 @@ public class FileMgr {
 		}
 		
 		this.fileMap = new ConcurrentHashMap<String, FileDeco>();
+	}
+	
+	public String[] listFiles(){
+		return dir.list();
 	}
 	
 	public boolean delete(String fileName){
@@ -125,6 +130,7 @@ public class FileMgr {
 		}
 		return b;
 	}
+	
 	
 	public void readBuffer(String fileName, byte[] buffer, long pos)  throws IOException{
 		File file = new File(this.dir, fileName);

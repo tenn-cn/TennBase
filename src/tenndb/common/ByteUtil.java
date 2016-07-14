@@ -4,6 +4,7 @@ public final class ByteUtil {
 
 	public static final int INT_SIZE   = Integer.SIZE / Byte.SIZE;
 	public static final int SHORT_SIZE = Short.SIZE   / Byte.SIZE;
+	public static final int BYTE_SIZE  = Byte.SIZE / Byte.SIZE;
 	
 	public final static int  SHORT_MAX_VALUE = 65535;
 	public final static long INT_MAX_VALUE   = 4294967296L;

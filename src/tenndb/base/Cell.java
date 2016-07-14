@@ -93,6 +93,62 @@ public class Cell implements IBase{
 	}
 	
 	@Override
+	public boolean insert(int key, byte[] buff, int offset, int len){
+		boolean b = false;
+		if(null != buff && buff.length > 0 && offset >= 0 && len >= 0 && (offset + len) <= buff.length){
+
+			DBBlock bblk = this.pageMgr.nextDBBlock(key, 0, buff, offset, len);
+
+			if(null != bblk){
+				
+				IdxBlock newblk = new IdxBlock(key);
+				newblk.setPageID(bblk.getPageID());
+				newblk.setOffset(bblk.getOffset());
+				newblk.setTag(IdxBlock.VALID);
+				
+				try {
+					this.index.insert(key, newblk, null, this.logMgr);
+				} catch (AbortTransException e) {
+					e.printStackTrace();
+				}
+				
+				b = true;
+			}	
+		}
+		return b;
+	}
+	
+	@Override
+	public boolean update(int key, byte[] buff, int offset, int size){
+		boolean b = false;		
+		IdxBlock oldblk = null;
+		
+		if(null != buff){
+			
+			DBBlock bblk = this.pageMgr.nextDBBlock(key, 0, buff, offset, size);
+
+			if(null != bblk){
+				
+				IdxBlock newblk = new IdxBlock(key);	
+				newblk.setPageID(bblk.getPageID());
+				newblk.setOffset(bblk.getOffset());
+			
+				try {
+					oldblk = this.index.update(key, newblk, null, this.logMgr);
+				} catch (AbortTransException e) {
+					e.printStackTrace();
+				}
+				
+				if(null != oldblk){
+					b = true;
+				}
+			}
+		}
+
+		return b;
+	}
+
+	@Override
 	public boolean insert(int key, Colunm colunm){
 		boolean b = false;
 		
