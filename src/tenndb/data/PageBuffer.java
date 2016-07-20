@@ -56,12 +56,14 @@ public class PageBuffer {
 	public  DBBlock nextBlock(int hashCode, int version, byte[] buff, int offset, int len){
 		DBBlock blk = null;
 		if(null != buff && buff.length > 0 && (this.offset + DBBlock.HEAD_SIZE + len) <= this.size){
+			synchronized(this){
 			try{
 				blk = this.getBlock(this.offset);
 				blk.setVar(hashCode, version, buff, offset, len);
 				this.offset += (DBBlock.HEAD_SIZE + len);
 			}catch(Exception e){
-				System.out.println("nextBlock " + e + " " + this.size + ", " + this.offset + ", " + len);
+				System.out.println("nextBlock.1 " + e + " " + this.buffer.capacity() + " " + this.buffer.limit() + " " + this.buffer.position() + " " + this.size + ", " + this.offset + ", " + len);
+			}
 			}
 		}
 		
@@ -76,7 +78,7 @@ public class PageBuffer {
 				blk.setColunm(colunm);
 				this.offset += (DBBlock.HEAD_SIZE + colunm.len);
 			}catch(Exception e){
-				System.out.println(e + " " + this.size + ", " + this.offset + ", " + colunm.len);
+				System.out.println("nextBlock.2 " + e + " " + this.buffer.capacity() + " " + this.buffer.limit() + " " + this.buffer.position() + " " + this.size + ", " + this.offset + ", " + colunm.len);
 			}
 		}
 		return blk;

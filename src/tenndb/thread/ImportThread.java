@@ -111,11 +111,17 @@ public class ImportThread extends Thread {
 							System.out.println(e);
 						}
 						
-						String newFileName = DistMgr.PREFIX_DELETE + fileName;
+//						String newFileName = DistMgr.PREFIX_DELETE + fileName;
 						
-//						this.fileMgr.rename(fileName, newFileName);
+						this.fileMgr.delete(fileName);
 						
 //						break;
+					}
+					
+					try {
+						Thread.sleep(10);
+					} catch (InterruptedException e) {
+						e.printStackTrace();
 					}
 
 				}

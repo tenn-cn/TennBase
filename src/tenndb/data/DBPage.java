@@ -22,7 +22,7 @@ public class DBPage {
 	public static final int HEAD_SIZE  = 0;//INT_SIZE + INT_SIZE ;
 //	public static final int BLOCK_SIZE = ByteUtil.INT_SIZE;
 	
-	public static final int PAGE_SIZE  = 1024 * 10;
+	public static final int PAGE_SIZE  = 1024 * 40;
 									//HEAD_SIZE +  
 									//(key + offset)*BALANCE_SIZE 48
 									//   BLOCK_SIZE * MAX_BLOCK_SIZE;

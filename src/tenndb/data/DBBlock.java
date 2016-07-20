@@ -46,7 +46,7 @@ public class DBBlock {
 		int key     = 0;
 		
 		synchronized(this.page){
-			this.page.buffer.rewind();
+//			this.page.buffer.rewind();
 			this.page.buffer.position(DBPage.HEAD_SIZE + this.offset);
 			
 			key = this.page.buffer.getInt();
@@ -104,7 +104,8 @@ public class DBBlock {
 		if(null != buff && buff.length > 0 && len > 0 && offset >= 0 && (offset + len) <= buff.length){
 			
 			synchronized(this.page){
-				this.page.buffer.rewind();
+//				this.page.buffer.rewind();
+				this.page.buffer.limit(DBPage.HEAD_SIZE + this.offset + DBBlock.HEAD_SIZE + len);
 				this.page.buffer.position(DBPage.HEAD_SIZE + this.offset);
 				//dword  key
 				//word   version
@@ -127,7 +128,8 @@ public class DBBlock {
 		if(null != fileds && version >= 0){
 			
 			synchronized(this.page){
-				this.page.buffer.rewind();
+//				this.page.buffer.rewind();
+				this.page.buffer.limit(DBPage.HEAD_SIZE + this.offset + DBBlock.HEAD_SIZE + len);
 				this.page.buffer.position(DBPage.HEAD_SIZE + this.offset);
 				//dword key
 				//word  version
@@ -166,6 +168,10 @@ public class DBBlock {
 				}
 			}
 		}
+	}
+
+	public PageBuffer getPage() {
+		return page;
 	}
 
 	public int getPageID() {

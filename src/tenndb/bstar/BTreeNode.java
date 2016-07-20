@@ -7,6 +7,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import tenndb.common.ByteUtil;
 import tenndb.common.SystemTime;
+import tenndb.data.ByteBufferMgr;
 import tenndb.index.IndexPage;
 import tenndb.log.CellLogMgr;
 import tenndb.tx.AbortTransException;
@@ -58,6 +59,8 @@ public class BTreeNode {
 		return blk;
 	}
 
+	public static ByteBufferMgr buffMgr = new ByteBufferMgr(IndexPage.PAGE_SIZE);
+	
 	protected IndexPage refPage = null;
 	
 	protected ReadWriteLock lock = new ReentrantReadWriteLock(false);
@@ -198,11 +201,12 @@ public class BTreeNode {
 	////type + pageid + parentid + priorid + nextid + size + (key + offset) * BALANCE_SIZE
 	public void toByteBuffer(List<ByteBuffer> list, BTreeNode rootNode){
 
-		this.lockRead();
-
-		ByteBuffer buffer = ByteBuffer.allocate(IndexPage.PAGE_SIZE);
+//		ByteBuffer buffer = ByteBuffer.allocate(IndexPage.PAGE_SIZE);
+		ByteBuffer buffer = buffMgr.pinBuffer();
 		buffer.rewind();
 		
+		this.lockRead();
+
 		this.toByteBuffer(buffer, rootNode);
 
 		list.add(buffer);	

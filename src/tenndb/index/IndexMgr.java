@@ -193,7 +193,7 @@ public class IndexMgr {
 			
 			FileDeco fd = this.fileMgr.pinFileChannel(PREFIX_INDEX + this.dbName);
 			long len = fd.getFileChannel().size();
-			System.out.println(PREFIX_INDEX + this.dbName + " len = " + len);
+//			System.out.println(PREFIX_INDEX + this.dbName + " len = " + len);
 			if(len >= ByteUtil.INT_SIZE){
 				fd.getFileChannel().position(0);
 				ByteBuffer buff = ByteBuffer.allocate(ByteUtil.INT_SIZE);
@@ -201,12 +201,12 @@ public class IndexMgr {
 				buff.rewind();
 				this.counter.set(buff.getInt());
 				
-				System.out.println("load counter = " + this.counter.get());
+//				System.out.println("load counter = " + this.counter.get());
 			}
 			if(len >= IndexPage.PAGE_SIZE + ByteUtil.INT_SIZE){
 				int size = (int) ((len - ByteUtil.INT_SIZE) / IndexPage.PAGE_SIZE);
 				
-				System.out.println("load size = " + size + ", len = " + len);
+//				System.out.println("load size = " + size + ", len = " + len);
 				
 				if(size * IndexPage.PAGE_SIZE < len){
 					ByteBuffer[] array = new ByteBuffer[size];
@@ -261,24 +261,27 @@ public class IndexMgr {
 				if(null != bufferList && bufferList.size() > 0){
 			
 					FileDeco fd = this.fileMgr.pinFileChannel(PREFIX_TEMP_INDEX + this.dbName);
-					ByteBuffer[] array = new ByteBuffer[bufferList.size()];
+		//			ByteBuffer[] array = new ByteBuffer[bufferList.size()];
 					fd.getFileChannel().truncate(0);
 					fd.getFileChannel().position(0);
 					
 					ByteBuffer buff = ByteBuffer.allocate(ByteUtil.INT_SIZE);
 					buff.putInt(this.counter.get());
 					buff.position(0);
-					System.out.println("flush counter = " + this.counter.get());
+//					System.out.println("flush counter = " + this.counter.get());
 					fd.getFileChannel().write(buff);
 			
 					for(int i = 0; i < bufferList.size(); ++i){
-						array[i] = bufferList.get(i);
+						ByteBuffer array = bufferList.get(i);
 			//			System.out.println(i + " limit = " + array[i].limit() + ",  size = " + array[i].getInt(17));
-						array[i].position(0);
+						array.position(0);
 						
-						while(array[i].hasRemaining()) {
-							fd.getFileChannel().write(array[i]);
+						while(array.hasRemaining()) {
+							fd.getFileChannel().write(array);
 						}
+						
+						
+						BTreeNode.buffMgr.unpinBuffer(array);
 					}
 					
 				    this.fileMgr.closeFileChannel(fd);			
