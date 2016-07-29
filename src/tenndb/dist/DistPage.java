@@ -8,7 +8,7 @@ public class DistPage {
 //
 //	public static final int PAGE_SIZE = 1024 * 1000 * 10;
 	
-	public static final int PAGE_SIZE = 1024 * 40;
+	public static final int PAGE_SIZE = 1024 * 400;
 	
 	protected ByteBuffer buffer;
 	

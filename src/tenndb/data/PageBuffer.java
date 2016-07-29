@@ -2,6 +2,8 @@ package tenndb.data;
 
 import java.nio.ByteBuffer;
 
+import tenndb.common.SystemTime;
+
 
 public class PageBuffer {
 
@@ -17,12 +19,15 @@ public class PageBuffer {
 	
 	protected String tableName;
 	
+	protected int tick;
+	
 	public PageBuffer(String tableName){
 		this.pageID    = 0;
 		this.offset    = 0;
 		this.tableName = tableName;
 		this.size      = DBPage.PAGE_SIZE;
 		this.tableID   = 0;
+		this.tick      = SystemTime.getSystemTime().currentTime();
 	}
 	
 	public String getTableName(){
@@ -108,6 +113,7 @@ public class PageBuffer {
 			blk = new DBBlock(this);
 			blk.setOffset(offset);
 			blk.setPageID(this.pageID);
+			this.tick = SystemTime.getSystemTime().currentTime();
 		}
 
 		return blk;

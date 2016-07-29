@@ -17,13 +17,14 @@ public class DemoThread extends Thread {
 		this.devID   = devID;
 		this.distMgr = distMgr;
 	}
-
+	protected static int SIZE = 100;
+	
 	public void run(){
 		int time = SystemTime.getSystemTime().currentTime();
 		List<byte[]> list = new ArrayList<byte[]>();
 		ByteBuffer buffer = ByteBuffer.allocate(25);
 		
-		for(int i = 0; i < 100; ++i){
+		for(int i = 0; i < SIZE; ++i){
 			byte[] array = new byte[25];
 			list.add(array);
 		}
@@ -33,8 +34,8 @@ public class DemoThread extends Thread {
 				int lng  = 1200000000;
 				int lat  =  300000000;
 				
-				for(int i = 0; i < 100; ++i){
-					time += i;
+				for(int i = 0; i < SIZE; ++i){
+					time++;
 					String strDevID   = String.valueOf(this.devID);
 					byte[] devIDArray = new byte[10];
 					byte[] temp       = strDevID.getBytes();
@@ -59,7 +60,7 @@ public class DemoThread extends Thread {
 				System.out.println(e);
 			}finally{
 				try {
-					Thread.sleep(1000);
+					Thread.sleep(100);
 				} catch (InterruptedException e) {
 					e.printStackTrace();
 				}

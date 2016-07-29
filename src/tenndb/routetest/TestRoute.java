@@ -25,7 +25,7 @@ public class TestRoute {
 		Map<String, Cell> map = new Hashtable<String, Cell>();
 		List<Cell> list = new ArrayList<Cell>();
 		
-		for(int i = 0; i < 300; ++i)
+		for(int i = 0; i < 3; ++i)
 		{
 			long dev = 1607130000 + i;
 			String level2 = String.valueOf(dev);
@@ -37,7 +37,7 @@ public class TestRoute {
 		}
 
 		int when = SystemTime.getSystemTime().currentTime();
-		for(int i = 1; i < 1000; ++i){
+		for(int i = 1; i < 100000; ++i){
 			String key = String.valueOf(when + i);
 			Colunm colunm = new Colunm(key, 1);
 			colunm.addFiled(new Filed("var1", key + 1));

@@ -22,7 +22,7 @@ public class Test {
 		int devID = 1607140000;
 		List<DemoThread> list = new ArrayList<DemoThread>();
 		
-		for(int i = 0; i < 40; ++i){
+		for(int i = 0; i < 20; ++i){
 			DemoThread thread = new DemoThread(devID + i, distMgr);
 			list.add(thread);			
 		}

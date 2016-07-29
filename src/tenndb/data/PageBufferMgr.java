@@ -11,6 +11,8 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import tenndb.common.FileDeco;
 import tenndb.common.FileMgr;
@@ -31,11 +33,23 @@ public class PageBufferMgr {
 	
 	protected ByteBufferMgr bufMgr = null;
 	
-	protected final Object lock = new Object();
+//	protected final Object lock = new Object();
 	
 	protected static final String PREFIX_UNUSED_PAGE = "unused_page_";
 	
 	protected static final String PREFIX_DATA = "data_";
+	
+	
+	protected ReadWriteLock lock = new ReentrantReadWriteLock(false);
+	
+	public void RLock()   { this.lock.readLock().lock();    }
+	
+	public void URLock()  { this.lock.readLock().unlock();  }
+
+	public void WLock()   { this.lock.writeLock().lock();   }
+	
+	public void UWLock()  { this.lock.writeLock().unlock(); }
+	
 	
 	public PageBufferMgr(String dbName, FileMgr fileMgr){
 		this.dbName      = dbName;
@@ -50,16 +64,25 @@ public class PageBufferMgr {
 	
 	protected DBBlock getBlock(int hashCode, int version, byte[] buff, int offset, int len){
 		DBBlock blk = null;
+		
+		this.RLock();
+		
 		PageBuffer page = this.unusedQueue.peek();
 
 		if(null != page){
 
 			if(page.isfull(len)){	
 	
+				this.URLock();
+				this.WLock();
+				
 				PageBuffer full = this.unusedQueue.poll();
 				this.usedList.add(full);
 				this.unusedMap.remove(page.pageID);
 				page = this.unusedQueue.peek();
+				
+				this.UWLock();
+				this.RLock();
 			}
 			
 			if(null != page){
@@ -67,31 +90,43 @@ public class PageBufferMgr {
 			}
 		}
 		
+		this.URLock();
 		return blk;
 	}
 	
 	protected DBBlock getBlock(Colunm colunm){
 		DBBlock blk = null;
+		
+		this.RLock();
+		
 		PageBuffer page = this.unusedQueue.peek();
 
 		if(null != page){
 
 			if(page.isfull(colunm.len)){	
 	
+				this.URLock();
+				this.WLock();
+				
 				PageBuffer full = this.unusedQueue.poll();
 				this.usedList.add(full);
 				this.unusedMap.remove(page.pageID);
 				page = this.unusedQueue.peek();
+				
+				this.UWLock();
+				this.RLock();
 			}
 			
 			if(null != page){
 				blk = page.nextBlock(colunm);
 			}
 		}
+		
+		this.URLock();
 		return blk;
 	}
 	
-	public synchronized DBBlock nextBlock(int hashCode, int version, byte[] buff, int offset, int len){
+	public DBBlock nextBlock(int hashCode, int version, byte[] buff, int offset, int len){
 		DBBlock blk = null;
 		if(null != buff && buff.length > 0 && (len + DBBlock.HEAD_SIZE) <= DBPage.MAX_BLOCK_SIZE){
 			blk = this.getBlock(hashCode, version, buff, offset, len);
@@ -105,7 +140,7 @@ public class PageBufferMgr {
 		return blk;
 	}
 	
-	public synchronized DBBlock nextBlock(Colunm colunm){
+	public DBBlock nextBlock(Colunm colunm){
 		DBBlock blk = null;
 		if(colunm.len > 0 && (colunm.len + DBBlock.HEAD_SIZE) <= DBPage.MAX_BLOCK_SIZE){
 			blk = this.getBlock(colunm);
@@ -120,6 +155,8 @@ public class PageBufferMgr {
 	}
 	
 	public void flushData(){
+		this.RLock();
+		
 		PageBuffer page = this.unusedQueue.peek();
 		if(null != page){
 			this.setPageBuffer(page);
@@ -129,11 +166,18 @@ public class PageBufferMgr {
 			for(int i = 0; i < usedList.size(); ++i){
 				PageBuffer buffer = usedList.get(i);
 				this.setPageBuffer(buffer);
+				
+				this.pageMap.remove(buffer.pageID);
 			}
+			
+			usedList.clear();
 		}
+		
+		this.URLock();
 	}
 	
 	public void flushPage(){
+		this.RLock();
 		
 		List<PageUnusedIndex> unusedList = new ArrayList<PageUnusedIndex>();
 		if(this.unusedMap.size() > 0){
@@ -179,6 +223,8 @@ public class PageBufferMgr {
 				}
 			}
 		}
+		
+		this.URLock();
 	}
 	
 	public void load(){
